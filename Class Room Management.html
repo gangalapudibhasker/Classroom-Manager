@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathHub • Classroom Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        .logo-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .card-hover {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .nav-link {
+            transition: all 0.2s;
+        }
+        .grade-tab.active {
+            background-color: rgb(59 130 246);
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-zinc-50 text-zinc-800">
+    <div class="flex h-screen overflow-hidden">
+        <!-- SIDEBAR -->
+        <div class="w-72 bg-white border-r border-zinc-200 flex flex-col">
+            <div class="px-8 py-6 border-b border-zinc-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl">
+                        📐
+                    </div>
+                    <div>
+                        <span class="logo-font text-3xl font-semibold tracking-tighter text-zinc-900">MathHub</span>
+                    </div>
+                </div>
+                <p class="text-xs text-zinc-500 mt-1 ml-1">Mathematics Classroom Manager</p>
+            </div>
+
+            <div class="px-4 py-6">
+                <div onclick="switchTab(0)" class="nav-item flex items-center gap-3 px-6 py-3 rounded-2xl hover:bg-zinc-100 cursor-pointer active">
+                    <i class="fa-solid fa-house w-5"></i>
+                    <span class="font-medium">Dashboard</span>
+                </div>
+                <div onclick="switchTab(1)" class="nav-item flex items-center gap-3 px-6 py-3 rounded-2xl hover:bg-zinc-100 cursor-pointer mt-1">
+                    <i class="fa-solid fa-calculator w-5"></i>
+                    <span class="font-medium">My Math Classes</span>
+                </div>
+            </div>
+
+            <!-- Grades -->
+            <div class="px-6 mt-4">
+                <div class="flex items-center justify-between text-xs uppercase tracking-widest text-zinc-500 font-medium mb-3 px-2">
+                    <span>Grades 6-10 • Mathematics</span>
+                </div>
+                <div id="grade-list" class="space-y-1"></div>
+            </div>
+
+            <div class="mt-auto p-6">
+                <div onclick="connectGoogleDrive()" 
+                     class="flex items-center justify-center gap-2 bg-white border border-zinc-300 hover:border-indigo-300 text-zinc-700 hover:text-indigo-700 rounded-3xl py-3 text-sm font-medium cursor-pointer transition-colors">
+                    <i class="fa-brands fa-google text-red-500"></i>
+                    <span>Connect Google Drive</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="flex-1 flex flex-col">
+            <header class="bg-white border-b border-zinc-100 px-8 py-5 flex items-center justify-between">
+                <div class="flex items-center gap-8">
+                    <div id="current-grade" class="text-2xl font-semibold text-zinc-800">Grade 8 • Mathematics</div>
+                </div>
+
+                <div class="flex items-center gap-6">
+                    <div class="relative w-80">
+                        <input id="search-input" 
+                               onkeyup="filterResources()"
+                               type="text" 
+                               placeholder="Search algebra, geometry, worksheets..." 
+                               class="w-full bg-zinc-100 border-0 focus:ring-2 focus:ring-indigo-300 rounded-3xl py-3 pl-12 text-sm">
+                        <i class="fa-solid fa-magnifying-glass absolute left-5 top-3.5 text-zinc-400"></i>
+                    </div>
+
+                    <button onclick="showUploadModal()" 
+                            class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-3xl text-sm font-semibold transition-colors">
+                        <i class="fa-solid fa-upload"></i>
+                        <span>Upload Resource</span>
+                    </button>
+
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <div class="text-sm font-medium">Mr. Gangalapudi</div>
+                            <div class="text-xs text-indigo-600">Math Teacher</div>
+                        </div>
+                        <div class="w-9 h-9 bg-amber-200 rounded-2xl flex items-center justify-center text-xl border-2 border-white shadow">
+                            👨‍🏫
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-auto p-8">
+                <div class="grid grid-cols-4 gap-6 mb-10">
+                    <div class="bg-white rounded-3xl p-6 shadow-sm">
+                        <div class="text-sm text-zinc-500">Total Math Resources</div>
+                        <div id="stat-total" class="text-4xl font-semibold mt-1">312</div>
+                    </div>
+                    <div class="bg-white rounded-3xl p-6 shadow-sm">
+                        <div class="text-sm text-zinc-500">Video Lessons</div>
+                        <div id="stat-videos" class="text-4xl font-semibold mt-1 text-purple-600">68</div>
+                    </div>
+                    <div class="bg-white rounded-3xl p-6 shadow-sm">
+                        <div class="text-sm text-zinc-500">Assignments Due</div>
+                        <div id="stat-assignments" class="text-4xl font-semibold mt-1 text-amber-600">11</div>
+                    </div>
+                    <div class="bg-white rounded-3xl p-6 shadow-sm">
+                        <div class="text-sm text-zinc-500">Shared with Students</div>
+                        <div class="text-4xl font-semibold mt-1 text-emerald-600">96%</div>
+                    </div>
+                </div>
+
+                <div id="resources-container" class="space-y-12"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl max-w-lg w-full mx-4 overflow-hidden">
+            <div class="px-8 py-6 border-b flex items-center justify-between">
+                <h3 class="text-xl font-semibold">Upload Math Resource</h3>
+                <button onclick="hideUploadModal()" class="text-3xl leading-none text-zinc-300 hover:text-zinc-500">×</button>
+            </div>
+            
+            <div class="p-8">
+                <div id="drop-zone" 
+                     class="border-2 border-dashed border-zinc-300 hover:border-indigo-400 rounded-3xl h-64 flex flex-col items-center justify-center cursor-pointer transition-colors"
+                     onclick="document.getElementById('file-input').click()">
+                    <i class="fa-solid fa-cloud-arrow-up text-5xl text-zinc-300 mb-4"></i>
+                    <p class="font-medium text-zinc-600">Drop files or click to upload</p>
+                    <p class="text-xs text-zinc-500 mt-2">PDF, MP4, DOCX, PNG, Links supported</p>
+                    <input type="file" id="file-input" class="hidden" multiple>
+                </div>
+            </div>
+            
+            <div class="bg-zinc-50 px-8 py-6 flex justify-end gap-4 border-t">
+                <button onclick="hideUploadModal()" class="px-8 py-3 text-zinc-600 font-medium">Cancel</button>
+                <button onclick="uploadFile()" class="px-8 py-3 bg-indigo-600 text-white rounded-3xl font-semibold">Upload to Google Drive</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentGrade = 8;
+
+        const mathData = {
+            6: {
+                name: "Grade 6 • Mathematics",
+                total: 184,
+                resources: [
+                    { id: 1, type: "pdf", name: "Fractions & Decimals.pdf", size: "3.2 MB", icon: "📘", color: "bg-red-100 text-red-600" },
+                    { id: 2, type: "video", name: "Understanding Fractions.mp4", size: "52 MB", icon: "🎥", color: "bg-purple-100 text-purple-600" },
+                    { id: 3, type: "assignment", name: "Fraction Word Problems", size: "Due May 18", icon: "📝", color: "bg-amber-100 text-amber-600" },
+                    { id: 4, type: "image", name: "Number Line Template.png", size: "1.4 MB", icon: "🖼️", color: "bg-emerald-100 text-emerald-600" }
+                ]
+            },
+            7: {
+                name: "Grade 7 • Mathematics",
+                total: 236,
+                resources: [
+                    { id: 5, type: "pdf", name: "Integers & Rational Numbers.pdf", size: "4.1 MB", icon: "📘", color: "bg-red-100 text-red-600" },
+                    { id: 6, type: "video", name: "Algebraic Expressions.mp4", size: "78 MB", icon: "🎥", color: "bg-purple-100 text-purple-600" },
+                    { id: 7, type: "assignment", name: "Percentage & Profit Loss", size: "Due May 22", icon: "📝", color: "bg-amber-100 text-amber-600" }
+                ]
+            },
+            8: {
+                name: "Grade 8 • Mathematics",
+                total: 312,
+                resources: [
+                    { id: 8, type: "pdf", name: "Linear Equations & Inequalities.pdf", size: "5.6 MB", icon: "📘", color: "bg-red-100 text-red-600" },
+                    { id: 9, type: "video", name: "Understanding Slope & Y-intercept.mp4", size: "95 MB", icon: "🎥", color: "bg-purple-100 text-purple-600" },
+                    { id: 10, type: "assignment", name: "Quadratic Equations Worksheet", size: "Due May 25", icon: "📝", color: "bg-amber-100 text-amber-600" },
+                    { id: 11, type: "link", name: "Desmos Graphing Calculator", size: "", icon: "🔗", color: "bg-sky-100 text-sky-600" }
+                ]
+            },
+            9: {
+                name: "Grade 9 • Mathematics",
+                total: 267,
+                resources: [
+                    { id: 12, type: "pdf", name: "Polynomials & Factorization.pdf", size: "6.8 MB", icon: "📘", color: "bg-red-100 text-red-600" },
+                    { id: 13, type: "video", name: "Coordinate Geometry.mp4", size: "110 MB", icon: "🎥", color: "bg-purple-100 text-purple-600" }
+                ]
+            },
+            10: {
+                name: "Grade 10 • Mathematics",
+                total: 298,
+                resources: [
+                    { id: 14, type: "pdf", name: "Trigonometry Basics.pdf", size: "7.2 MB", icon: "📘", color: "bg-red-100 text-red-600" },
+                    { id: 15, type: "video", name: "Quadratic Functions & Graphs.mp4", size: "85 MB", icon: "🎥", color: "bg-purple-100 text-purple-600" },
+                    { id: 16, type: "assignment", name: "Board Exam Practice Set", size: "Due Jun 05", icon: "📝", color: "bg-amber-100 text-amber-600" }
+                ]
+            }
+        };
+
+        function renderGradeList() {
+            const container = document.getElementById("grade-list");
+            container.innerHTML = "";
+            
+            for (let g = 6; g <= 10; g++) {
+                const active = g === currentGrade ? "bg-indigo-50 text-indigo-700 font-medium" : "hover:bg-zinc-100";
+                const div = document.createElement("div");
+                div.className = `px-6 py-3 rounded-2xl flex items-center justify-between cursor-pointer ${active}`;
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="text-xl">📐</span>
+                        <span>Grade ${g}</span>
+                    </div>
+                    <span class="text-xs bg-white shadow px-3 py-1 rounded-2xl">${mathData[g].total}</span>
+                `;
+                div.onclick = () => {
+                    currentGrade = g;
+                    renderGradeList();
+                    renderResources();
+                };
+                container.appendChild(div);
+            }
+        }
+
+        function getFileTypeHTML(resource) {
+            return `
+                <div class="card-hover bg-white border border-zinc-200 rounded-3xl p-6 flex gap-5">
+                    <div class="${resource.color} w-14 h-14 flex-shrink-0 rounded-2xl flex items-center justify-center text-4xl">
+                        ${resource.icon}
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-semibold text-lg leading-tight">${resource.name}</div>
+                        <div class="text-sm text-zinc-500 mt-1">${resource.size}</div>
+                        <div class="mt-6 flex gap-3">
+                            <button onclick="viewFile(${resource.id})" class="text-sm px-5 py-2.5 bg-zinc-100 hover:bg-zinc-200 rounded-2xl transition-colors">Open</button>
+                            <button onclick="shareFile(${resource.id})" class="text-sm px-5 py-2.5 bg-zinc-100 hover:bg-zinc-200 rounded-2xl transition-colors">Share</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderResources() {
+            const data = mathData[currentGrade];
+            document.getElementById("current-grade").textContent = data.name;
+            
+            const container = document.getElementById("resources-container");
+            container.innerHTML = `
+                <div class="mb-6 flex justify-between items-center">
+                    <h2 class="text-2xl font-semibold">Math Resources</h2>
+                    <span class="text-zinc-500">${data.total} files</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="resource-grid"></div>
+            `;
+
+            const grid = document.getElementById("resource-grid");
+            
+            data.resources.forEach(res => {
+                const div = document.createElement("div");
+                div.innerHTML = getFileTypeHTML(res);
+                grid.appendChild(div);
+            });
+        }
+
+        function filterResources() {
+            const term = document.getElementById("search-input").value.toLowerCase();
+            const cards = document.querySelectorAll("#resource-grid > div");
+            cards.forEach(card => {
+                card.style.display = card.textContent.toLowerCase().includes(term) ? "" : "none";
+            });
+        }
+
+        function showUploadModal() {
+            document.getElementById("upload-modal").classList.remove("hidden");
+            document.getElementById("upload-modal").classList.add("flex");
+        }
+        
+        function hideUploadModal() {
+            const modal = document.getElementById("upload-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        function uploadFile() {
+            alert("✅ Math resource uploaded successfully and synced with Google Drive!");
+            hideUploadModal();
+            
+            setTimeout(() => {
+                const data = mathData[currentGrade];
+                data.resources.unshift({
+                    id: Date.now(),
+                    type: "pdf",
+                    name: "New_Math_Resource.pdf",
+                    size: "Just now",
+                    icon: "📘",
+                    color: "bg-red-100 text-red-600"
+                });
+                data.total++;
+                renderResources();
+                renderGradeList();
+            }, 600);
+        }
+
+        function connectGoogleDrive() {
+            const btn = event.currentTarget;
+            const original = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Connecting...`;
+            
+            setTimeout(() => {
+                alert("🎉 Google Drive connected!\nAll your Math folders are now synced.");
+                btn.innerHTML = original;
+            }, 1200);
+        }
+
+        function viewFile(id) {
+            alert(`Opening Math file #${id}...`);
+        }
+        
+        function shareFile(id) {
+            alert(`Shareable link copied for file #${id}`);
+        }
+
+        function switchTab(n) {
+            document.querySelectorAll('.nav-item').forEach((el, i) => el.classList.toggle('active', i === n));
+        }
+
+        // Initialize
+        window.onload = () => {
+            renderGradeList();
+            renderResources();
+        };
+    </script>
+</body>
+</html>
