@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MathHub • Classroom Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- ✅ Correct Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .logo-font { font-family: 'Space Grotesk', sans-serif; }
+
+    .upload-area {
+      border: 2px dashed #c7d2fe;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .upload-area.drag-over {
+      border-color: #4f46e5;
+      background: #eef2ff;
+    }
+    .progress-bar-inner {
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+<body class="bg-zinc-50 text-zinc-800">
+<div class="flex h-screen overflow-hidden">
+
+  <!-- Sidebar -->
+  <div class="w-72 bg-white border-r flex flex-col">
+    <div class="px-8 py-6 border-b">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl">📐</div>
+        <span class="logo-font text-3xl font-semibold">MathHub</span>
+      </div>
+    </div>
+    <div class="px-6 mt-8">
+      <div class="text-xs uppercase tracking-widest text-zinc-500 mb-3">Grades 6-10</div>
+      <div id="grade-list" class="space-y-1"></div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <header class="bg-white border-b px-8 py-5 flex justify-between items-center">
+      <div id="current-grade" class="text-2xl font-semibold">Grade 8 • Mathematics</div>
+      <button id="btn-open-modal" class="bg-indigo-600 text-white px-6 py-3 rounded-3xl flex items-center gap-2 hover:bg-indigo-700 transition-colors">
+        <i class="fa-solid fa-upload"></i> Upload Resource
+      </button>
+    </header>
+    <div class="p-8 overflow-auto flex-1">
+      <div id="resources-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Modal -->
+<div id="upload-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+  <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
+    <h3 class="text-xl font-semibold mb-2">Upload Math Resource</h3>
+    <p class="text-sm text-zinc-500 mb-6">Supports PDF, DOCX, images, and more.</p>
+
+    <!-- Drag & Drop Zone -->
+    <div
+      id="drop-zone"
+      class="upload-area rounded-2xl p-8 text-center mb-4 cursor-pointer"
+    >
+      <i class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-400 mb-3"></i>
+      <p class="font-medium text-zinc-700">Drag & drop or click to choose</p>
+      <p id="file-label" class="text-sm text-zinc-400 mt-1">No file selected</p>
+    </div>
+    <input type="file" id="fileInput" class="hidden">
+
+    <!-- Progress Bar (hidden until upload starts) -->
+    <div id="progress-wrap" class="hidden mb-4">
+      <div class="flex justify-between text-xs text-zinc-500 mb-1">
+        <span>Uploading…</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="w-full bg-zinc-100 rounded-full h-2">
+        <div id="progress-bar" class="progress-bar-inner bg-indigo-600 h-2 rounded-full" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div id="upload-error" class="hidden text-red-500 text-sm mb-3 p-3 bg-red-50 rounded-xl"></div>
+
+    <div class="flex gap-3">
+      <button id="btn-cancel" class="flex-1 py-3 border rounded-3xl hover:bg-zinc-50 transition-colors">Cancel</button>
+      <button id="upload-btn" class="flex-1 bg-indigo-600 text-white py-3 rounded-3xl hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Upload</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─────────────────────────────────────────────
+  // 🔧 CONFIGURATION — replace these two values
+  // ─────────────────────────────────────────────
+  const SUPABASE_URL = 'https://uelnmcbwicwheancmgcu.supabase.co';
+
+  // ⚠️  IMPORTANT: paste your actual "anon public" key from:
+  //    Supabase Dashboard → Project Settings → API → Project API keys → anon / public
+  //    It starts with "eyJ..." and is much longer than what you had before.
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlbG5tY2J3aWN3aGVhbmNtZ2N1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MDA4ODgsImV4cCI6MjA5NDM3Njg4OH0.IQ8YFiofOeW0Vs_FI_w01pKf56YNe8qorJXa__7RR4I';
+
+  // ─────────────────────────────────────────────
+  // ✅ Correct initialisation (lowercase 'supabase')
+  // ─────────────────────────────────────────────
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const BUCKET = 'math-resources';
+  let currentGrade = 8;
+  let selectedFile = null;
+
+  // ── Grade sidebar ──────────────────────────────
+  function renderGradeList() {
+    const container = document.getElementById('grade-list');
+    container.innerHTML = '';
+    for (let g = 6; g <= 10; g++) {
+      const active = g === currentGrade ? 'bg-indigo-50 text-indigo-700 font-medium' : 'hover:bg-zinc-100 text-zinc-700';
+      const div = document.createElement('div');
+      div.className = `px-4 py-3 rounded-2xl cursor-pointer flex justify-between items-center transition-colors ${active}`;
+      div.innerHTML = `<span>Grade ${g} Mathematics</span>`;
+      div.onclick = () => { currentGrade = g; renderGradeList(); loadFiles(); updateHeader(); };
+      container.appendChild(div);
+    }
+  }
+
+  function updateHeader() {
+    document.getElementById('current-grade').textContent = `Grade ${currentGrade} • Mathematics`;
+  }
+
+  // ── File picker helpers ────────────────────────
+  function onFileChosen(event) {
+    selectedFile = event.target.files[0];
+    document.getElementById('file-label').textContent = selectedFile ? selectedFile.name : 'No file selected';
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('drop-zone').classList.add('drag-over');
+  }
+
+  function handleDragLeave(e) {
+    document.getElementById('drop-zone').classList.remove('drag-over');
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('drop-zone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      selectedFile = file;
+      document.getElementById('file-label').textContent = file.name;
+    }
+  }
+
+  // ── Upload ─────────────────────────────────────
+  async function uploadFile() {
+    if (!selectedFile) return showError('Please select a file first.');
+
+    const btn = document.getElementById('upload-btn');
+    const progressWrap = document.getElementById('progress-wrap');
+    const progressBar = document.getElementById('progress-bar');
+    const progressPct = document.getElementById('progress-pct');
+
+    btn.disabled = true;
+    hideError();
+    progressWrap.classList.remove('hidden');
+    setProgress(10);
+
+    const safeName = selectedFile.name.replace(/[^a-zA-Z0-9._\-]/g, '_');
+    const filePath = `${currentGrade}/${Date.now()}-${safeName}`;
+
+    try {
+      setProgress(30);
+      const { data, error } = await sb.storage
+        .from(BUCKET)
+        .upload(filePath, selectedFile, { upsert: true });
+
+      if (error) throw error;
+
+      setProgress(100);
+      progressPct.textContent = '100%';
+
+      setTimeout(() => {
+        hideUploadModal();
+        loadFiles();
+      }, 600);
+
+    } catch (err) {
+      console.error('Upload error:', err);
+      showError('Upload failed: ' + (err.message || JSON.stringify(err)));
+      progressWrap.classList.add('hidden');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function setProgress(pct) {
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progress-pct').textContent = pct + '%';
+  }
+
+  // ── Load & display files ───────────────────────
+  async function loadFiles() {
+    const container = document.getElementById('resources-container');
+    container.innerHTML = `
+      <div class="col-span-full flex items-center justify-between mb-2">
+        <h2 class="text-2xl font-semibold">Grade ${currentGrade} Resources</h2>
+      </div>
+    `;
+
+    // Spinner
+    const spinner = document.createElement('div');
+    spinner.className = 'col-span-full flex justify-center py-20';
+    spinner.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-3xl text-indigo-400"></i>`;
+    container.appendChild(spinner);
+
+    try {
+      const { data, error } = await sb.storage.from(BUCKET).list(`${currentGrade}/`, {
+        limit: 100,
+        sortBy: { column: 'created_at', order: 'desc' }
+      });
+
+      container.removeChild(spinner);
+
+      if (error) throw error;
+
+      // Filter out the placeholder .emptyFolderPlaceholder files Supabase may add
+      const files = (data || []).filter(f => f.name !== '.emptyFolderPlaceholder');
+
+      if (files.length === 0) {
+        container.innerHTML += `
+          <div class="col-span-full flex flex-col items-center justify-center py-24 text-zinc-400 gap-3">
+            <i class="fa-solid fa-folder-open text-5xl"></i>
+            <p class="text-lg font-medium">No resources yet</p>
+            <p class="text-sm">Upload your first file using the button above</p>
+          </div>`;
+        return;
+      }
+
+      files.forEach(file => {
+        const sizeText = file.metadata?.size
+          ? (file.metadata.size / 1024 / 1024).toFixed(2) + ' MB'
+          : 'Unknown size';
+
+        const ext = file.name.split('.').pop().toUpperCase();
+        const icon = getIcon(ext);
+
+        const div = document.createElement('div');
+        div.className = 'bg-white border rounded-3xl p-6 flex flex-col gap-3 hover:shadow-md transition-shadow';
+        div.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 text-lg flex-shrink-0">${icon}</div>
+            <div class="min-w-0">
+              <p class="font-medium break-all leading-tight">${file.name.replace(/^\d+-/, '')}</p>
+              <p class="text-xs text-zinc-400 mt-1">${sizeText} · ${ext}</p>
+            </div>
+          </div>
+          <div class="flex gap-2 mt-1">
+            <button data-action="open" data-filename="${file.name}" class="flex-1 bg-indigo-600 text-white text-sm py-2 rounded-2xl hover:bg-indigo-700 transition-colors">
+              <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Open
+            </button>
+            <button data-action="delete" data-filename="${file.name}" class="px-4 py-2 border text-zinc-500 text-sm rounded-2xl hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+
+    } catch (err) {
+      console.error('Load error:', err);
+      container.removeChild(spinner);
+      container.innerHTML += `
+        <div class="col-span-full p-6 bg-red-50 rounded-2xl text-red-600">
+          <strong>Error loading files:</strong> ${err.message}
+        </div>`;
+    }
+  }
+
+  function getIcon(ext) {
+    const map = {
+      PDF: '📄', DOCX: '📝', DOC: '📝',
+      XLSX: '📊', XLS: '📊', CSV: '📊',
+      PPTX: '📑', PPT: '📑',
+      PNG: '🖼️', JPG: '🖼️', JPEG: '🖼️', GIF: '🖼️', WEBP: '🖼️',
+      MP4: '🎬', MOV: '🎬',
+      ZIP: '🗜️', RAR: '🗜️',
+    };
+    return map[ext] || '📁';
+  }
+
+  // ── Open / Delete — called via event delegation on #resources-container ──
+  function openFile(filename) {
+    const { data } = sb.storage.from(BUCKET).getPublicUrl(`${currentGrade}/${filename}`);
+    if (data?.publicUrl) {
+      window.open(data.publicUrl, '_blank');
+    } else {
+      alert('Could not generate a public URL. Make sure your bucket is set to Public in Supabase.');
+    }
+  }
+
+  async function deleteFile(filename, btn) {
+    if (!confirm(`Delete "${filename.replace(/^\d+-/, '')}"?`)) return;
+    btn.disabled = true;
+    const { error } = await sb.storage.from(BUCKET).remove([`${currentGrade}/${filename}`]);
+    if (error) {
+      alert('Delete failed: ' + error.message);
+      btn.disabled = false;
+    } else {
+      loadFiles();
+    }
+  }
+
+  // ── Modal helpers ──────────────────────────────
+  function showUploadModal() {
+    selectedFile = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('file-label').textContent = 'No file selected';
+    document.getElementById('progress-wrap').classList.add('hidden');
+    document.getElementById('progress-bar').style.width = '0%';
+    hideError();
+    document.getElementById('upload-modal').classList.remove('hidden');
+  }
+
+  function hideUploadModal() {
+    document.getElementById('upload-modal').classList.add('hidden');
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('upload-error');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+
+  function hideError() {
+    document.getElementById('upload-error').classList.add('hidden');
+  }
+
+  // ── Init — all listeners attached here, never inline ──
+  document.addEventListener('DOMContentLoaded', () => {
+    // Header "Upload Resource" button
+    document.getElementById('btn-open-modal').addEventListener('click', showUploadModal);
+
+    // Modal cancel & upload buttons
+    document.getElementById('btn-cancel').addEventListener('click', hideUploadModal);
+    document.getElementById('upload-btn').addEventListener('click', uploadFile);
+
+    // Drop zone click → trigger hidden file input
+    const dropZone = document.getElementById('drop-zone');
+    dropZone.addEventListener('click', () => document.getElementById('fileInput').click());
+    dropZone.addEventListener('dragover', handleDragOver);
+    dropZone.addEventListener('dragleave', handleDragLeave);
+    dropZone.addEventListener('drop', handleDrop);
+
+    // File input change
+    document.getElementById('fileInput').addEventListener('change', onFileChosen);
+
+    // Event delegation for Open / Delete buttons inside resource cards
+    document.getElementById('resources-container').addEventListener('click', e => {
+      const openBtn = e.target.closest('[data-action="open"]');
+      const delBtn  = e.target.closest('[data-action="delete"]');
+      if (openBtn) openFile(openBtn.dataset.filename);
+      if (delBtn)  deleteFile(delBtn.dataset.filename, delBtn);
+    });
+
+    renderGradeList();
+    loadFiles();
+  });
+</script>
+</body>
+</html>
