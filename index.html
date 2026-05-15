@@ -56,7 +56,7 @@
 
 <script>
   const supabaseUrl = 'https://uelnmcbwicwheancmgcu.supabase.co';
-  const supabaseKey = 'sb_publishable_eNF3BdnrRlLgY_hVTzifsw_ypHqQ6ZU';
+  const supabaseKey = 'sb_publishable_eNF3BdnrRlLgY_hVTzifsw_ypHqQ6ZU';   // Your public key
   
   const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
 
@@ -82,28 +82,27 @@
     const filePath = `${currentGrade}/${Date.now()}-${file.name}`;
 
     try {
-      console.log("Uploading to:", filePath);
       const { data, error } = await supabase.storage
         .from('math-resources')
         .upload(filePath, file, { upsert: true });
 
       if (error) {
-        console.error("Upload Error:", error);
-        alert("Upload Failed: " + error.message);
+        console.error("Supabase Error:", error);
+        alert("Upload Failed:\n" + error.message);
       } else {
-        alert("✅ Successfully uploaded!");
+        alert("✅ File uploaded successfully to Supabase!");
         hideUploadModal();
         loadFiles();
       }
     } catch (err) {
       console.error(err);
-      alert("Error: " + err.message);
+      alert("Unexpected error: " + err.message);
     }
   }
 
   async function loadFiles() {
     const container = document.getElementById("resources-container");
-    container.innerHTML = `<h2 class="text-2xl font-semibold mb-6">Grade ${currentGrade} Resources</h2>`;
+    container.innerHTML = `<h2 class="col-span-full text-2xl font-semibold mb-6">Grade ${currentGrade} Resources</h2>`;
 
     try {
       const { data, error } = await supabase.storage.from('math-resources').list(`${currentGrade}/`);
@@ -111,22 +110,23 @@
       if (error) throw error;
 
       if (data.length === 0) {
-        container.innerHTML += `<p class="col-span-3 text-center py-20 text-zinc-500">No files yet in this grade.</p>`;
+        container.innerHTML += `<p class="col-span-full text-center py-20 text-zinc-500">No files yet. Upload your first resource!</p>`;
         return;
       }
 
       data.forEach(file => {
         const div = document.createElement("div");
-        div.className = "bg-white p-6 rounded-3xl border";
+        div.className = "bg-white border rounded-3xl p-6";
         div.innerHTML = `
-          <p class="font-medium">${file.name}</p>
-          <button onclick="downloadFile('${file.name}')" class="text-indigo-600 text-sm mt-3">Download</button>
+          <p class="font-medium break-all">${file.name}</p>
+          <p class="text-xs text-zinc-500">${(file.metadata.size / 1024 / 1024).toFixed(2)} MB</p>
+          <button onclick="downloadFile('${file.name}')" class="mt-4 text-indigo-600 text-sm font-medium">Open / Download</button>
         `;
         container.appendChild(div);
       });
     } catch (err) {
       console.error(err);
-      container.innerHTML += `<p class="text-red-500">Error: ${err.message}</p>`;
+      container.innerHTML += `<p class="text-red-500">Error loading files: ${err.message}</p>`;
     }
   }
 
