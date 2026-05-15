@@ -11,44 +11,31 @@
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
     body { font-family: 'Inter', sans-serif; }
     .logo-font { font-family: 'Space Grotesk', sans-serif; }
-    .card-hover:hover { transform: translateY(-4px); }
   </style>
 </head>
 <body class="bg-zinc-50 text-zinc-800">
 
 <div class="flex h-screen overflow-hidden">
-  <!-- Sidebar -->
   <div class="w-72 bg-white border-r flex flex-col">
     <div class="px-8 py-6 border-b">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl">📐</div>
-        <span class="logo-font text-3xl font-semibold tracking-tighter">MathHub</span>
+        <span class="logo-font text-3xl font-semibold">MathHub</span>
       </div>
-      <p class="text-xs text-zinc-500 mt-1">Mathematics Classroom Manager</p>
     </div>
-
     <div class="px-6 mt-8">
       <div class="text-xs uppercase tracking-widest text-zinc-500 mb-3">Grades 6-10</div>
       <div id="grade-list" class="space-y-1"></div>
     </div>
-
-    <div class="mt-auto p-6 text-xs text-emerald-600">
-      ✅ Connected to Supabase Storage
-    </div>
   </div>
 
-  <!-- Main Content -->
   <div class="flex-1 flex flex-col">
-    <header class="bg-white border-b px-8 py-5 flex items-center justify-between">
+    <header class="bg-white border-b px-8 py-5 flex justify-between items-center">
       <div id="current-grade" class="text-2xl font-semibold">Grade 8 • Mathematics</div>
-      
-      <button onclick="showUploadModal()" 
-              class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-3xl flex items-center gap-2 transition-all">
-        <i class="fa-solid fa-upload"></i>
-        <span>Upload Resource</span>
+      <button onclick="showUploadModal()" class="bg-indigo-600 text-white px-6 py-3 rounded-3xl flex items-center gap-2">
+        <i class="fa-solid fa-upload"></i> Upload Resource
       </button>
     </header>
-
     <div class="p-8 overflow-auto">
       <div id="resources-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
@@ -59,11 +46,10 @@
 <div id="upload-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
   <div class="bg-white rounded-3xl p-8 w-full max-w-md">
     <h3 class="text-xl font-semibold mb-6">Upload Math Resource</h3>
-    <input type="file" id="fileInput" class="w-full mb-6 border border-zinc-300 rounded-2xl p-3">
-    
+    <input type="file" id="fileInput" class="w-full mb-6">
     <div class="flex gap-3">
       <button onclick="hideUploadModal()" class="flex-1 py-3 border rounded-3xl">Cancel</button>
-      <button onclick="uploadFile()" class="flex-1 bg-indigo-600 text-white py-3 rounded-3xl">Upload Now</button>
+      <button onclick="uploadFile()" class="flex-1 bg-indigo-600 text-white py-3 rounded-3xl">Upload</button>
     </div>
   </div>
 </div>
@@ -76,109 +62,82 @@
 
   let currentGrade = 8;
 
-  // Render Grade List
   function renderGradeList() {
     const container = document.getElementById("grade-list");
     container.innerHTML = "";
-    
     for (let g = 6; g <= 10; g++) {
       const active = g === currentGrade ? "bg-indigo-50 text-indigo-700 font-medium" : "hover:bg-zinc-100";
       const div = document.createElement("div");
       div.className = `px-6 py-3 rounded-2xl cursor-pointer flex justify-between ${active}`;
-      div.innerHTML = `
-        <span>Grade ${g} • Mathematics</span>
-        <span class="text-xs bg-white shadow px-3 py-1 rounded-xl">Live</span>
-      `;
-      div.onclick = () => {
-        currentGrade = g;
-        renderGradeList();
-        loadFiles();
-      };
+      div.innerHTML = `<span>Grade ${g} Mathematics</span>`;
+      div.onclick = () => { currentGrade = g; renderGradeList(); loadFiles(); };
       container.appendChild(div);
     }
   }
 
-  // Upload File
   async function uploadFile() {
     const file = document.getElementById("fileInput").files[0];
-    if (!file) return alert("Please select a file first!");
+    if (!file) return alert("Please select a file");
 
     const filePath = `${currentGrade}/${Date.now()}-${file.name}`;
 
     try {
-      const { error } = await supabase.storage
+      console.log("Uploading to:", filePath);
+      const { data, error } = await supabase.storage
         .from('math-resources')
         .upload(filePath, file, { upsert: true });
 
-      if (error) throw error;
-
-      alert("✅ File uploaded successfully!");
-      hideUploadModal();
-      loadFiles();
+      if (error) {
+        console.error("Upload Error:", error);
+        alert("Upload Failed: " + error.message);
+      } else {
+        alert("✅ Successfully uploaded!");
+        hideUploadModal();
+        loadFiles();
+      }
     } catch (err) {
       console.error(err);
-      alert("Upload failed: " + err.message);
+      alert("Error: " + err.message);
     }
   }
 
-  // Load Files
   async function loadFiles() {
     const container = document.getElementById("resources-container");
-    container.innerHTML = `<h2 class="col-span-full text-2xl font-semibold mb-6">Grade ${currentGrade} Resources</h2>`;
+    container.innerHTML = `<h2 class="text-2xl font-semibold mb-6">Grade ${currentGrade} Resources</h2>`;
 
     try {
-      const { data, error } = await supabase.storage
-        .from('math-resources')
-        .list(`${currentGrade}/`);
-
+      const { data, error } = await supabase.storage.from('math-resources').list(`${currentGrade}/`);
+      
       if (error) throw error;
 
       if (data.length === 0) {
-        container.innerHTML += `<p class="col-span-full text-center py-16 text-zinc-500">No files uploaded yet for this grade.<br>Click "Upload Resource" to get started.</p>`;
+        container.innerHTML += `<p class="col-span-3 text-center py-20 text-zinc-500">No files yet in this grade.</p>`;
         return;
       }
 
       data.forEach(file => {
         const div = document.createElement("div");
-        div.className = "bg-white border border-zinc-200 rounded-3xl p-6 card-hover";
+        div.className = "bg-white p-6 rounded-3xl border";
         div.innerHTML = `
-          <div class="flex gap-4 items-start">
-            <div class="text-4xl">📘</div>
-            <div class="flex-1 min-w-0">
-              <p class="font-medium truncate">${file.name}</p>
-              <p class="text-xs text-zinc-500 mt-1">${(file.metadata.size / (1024*1024)).toFixed(2)} MB</p>
-              <button onclick="downloadFile('${file.name}')" 
-                      class="mt-5 text-indigo-600 hover:text-indigo-700 text-sm font-medium">
-                📥 Open / Download
-              </button>
-            </div>
-          </div>
+          <p class="font-medium">${file.name}</p>
+          <button onclick="downloadFile('${file.name}')" class="text-indigo-600 text-sm mt-3">Download</button>
         `;
         container.appendChild(div);
       });
     } catch (err) {
       console.error(err);
-      container.innerHTML += `<p class="text-red-500">Error loading files</p>`;
+      container.innerHTML += `<p class="text-red-500">Error: ${err.message}</p>`;
     }
   }
 
-  async function downloadFile(filename) {
-    const { data } = supabase.storage
-      .from('math-resources')
-      .getPublicUrl(`${currentGrade}/${filename}`);
-    
+  function downloadFile(filename) {
+    const { data } = supabase.storage.from('math-resources').getPublicUrl(`${currentGrade}/${filename}`);
     window.open(data.publicUrl, '_blank');
   }
 
-  function showUploadModal() {
-    document.getElementById("upload-modal").classList.remove("hidden");
-  }
+  function showUploadModal() { document.getElementById("upload-modal").classList.remove("hidden"); }
+  function hideUploadModal() { document.getElementById("upload-modal").classList.add("hidden"); }
 
-  function hideUploadModal() {
-    document.getElementById("upload-modal").classList.add("hidden");
-  }
-
-  // Initialize
   window.onload = () => {
     renderGradeList();
     loadFiles();
