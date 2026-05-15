@@ -16,7 +16,7 @@
     .progress-bar-inner { transition: width 0.3s ease; }
     #sidebar { transition: transform 0.25s ease; }
     #sidebar-overlay { transition: opacity 0.25s ease; }
-    .thumb-img { width: 100%; height: 130px; object-fit: cover; border-radius: 16px 16px 0 0; }
+    .thumb-img { width: 100%; height: 130px; object-fit: contain; background: #f8f8f9; border-radius: 16px 16px 0 0; }
     .thumb-placeholder { width: 100%; height: 90px; display: flex; align-items: center; justify-content: center; background: #f4f4f5; font-size: 2.2rem; border-radius: 16px 16px 0 0; }
   </style>
 </head>
@@ -173,7 +173,7 @@
   const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const BUCKET = 'math-resources';
-  const ADMIN_PASSWORD = 'Gsreddy8*';
+  const ADMIN_PASSWORD = 'MathHub@2025';
 
   let currentGrade = 8;
   let selectedFile = null;
@@ -354,7 +354,7 @@
 
       if (filesRes.error) throw filesRes.error;
 
-      const files = (filesRes.data || []).filter(f => f.name !== '.emptyFolderPlaceholder');
+      const files = (filesRes.data || []).filter(f => f.name !== '.emptyFolderPlaceholder' && f.name !== 'thumbs');
       const thumbs = (thumbsRes.data || []).filter(f => f.name !== '.emptyFolderPlaceholder');
 
       // Map timestamp prefix → public thumbnail URL
