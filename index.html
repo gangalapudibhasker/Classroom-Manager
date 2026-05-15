@@ -26,8 +26,8 @@
     }
   </style>
 </head>
-<body class="bg-zinc-50 text-zinc-800">
-<div class="flex h-screen overflow-hidden">
+<body class="bg-zinc-50 text-zinc-800 flex flex-col h-screen">
+<div class="flex flex-1 overflow-hidden">
 
   <!-- Sidebar -->
   <div class="w-72 bg-white border-r flex flex-col">
@@ -54,25 +54,29 @@
     <div class="p-8 overflow-auto flex-1 flex flex-col">
       <div id="resources-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-      <!-- Footer -->
-      <footer class="mt-auto border-t border-zinc-200 pt-6 pb-5 text-center">
-        <p style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#a1a1aa;margin:0 0 6px;">Designed by</p>
-        <p style="font-size:18px;font-weight:500;color:#18181b;margin:0 0 4px;">Gangalapudi Bhasker Reddy</p>
-        <p style="font-size:12px;color:#71717a;margin:0 0 16px;letter-spacing:0.03em;">Andhra Pradesh Mathematics Forum &mdash; State President</p>
-        <div class="flex items-center justify-center gap-6 flex-wrap">
-          <a href="mailto:ganagalapudi.bhasker@gmail.com" class="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 transition-colors" style="font-size:13px;text-decoration:none;">
-            <i class="fa-solid fa-envelope" style="font-size:15px;"></i>
-            ganagalapudi.bhasker@gmail.com
-          </a>
-          <a href="https://wa.me/918555079452" target="_blank" rel="noopener" class="flex items-center gap-2 hover:opacity-80 transition-opacity" style="font-size:13px;color:#16a34a;text-decoration:none;">
-            <i class="fa-brands fa-whatsapp" style="font-size:15px;"></i>
-            +91 85550 79452 <span style="font-size:12px;color:#a1a1aa;margin-left:2px;">(WhatsApp only)</span>
-          </a>
-        </div>
-      </footer>
     </div>
   </div>
 </div>
+
+<!-- Full-width footer outside sidebar+main layout -->
+<footer style="border-top:0.5px solid #e4e4e7;padding:0.4rem 1.5rem;display:flex;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;background:#fff;">
+  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+    <span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#a1a1aa;">Designed by</span>
+    <span style="font-size:12px;font-weight:500;color:#18181b;">Gangalapudi Bhasker Reddy</span>
+    <span style="color:#d4d4d8;font-size:11px;">·</span>
+    <span style="font-size:11px;color:#71717a;">Andhra Pradesh Mathematics Forum, State President</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <a href="mailto:ganagalapudi.bhasker@gmail.com" style="display:flex;align-items:center;gap:4px;font-size:11px;color:#4f46e5;text-decoration:none;">
+      <i class="fa-solid fa-envelope" style="font-size:12px;"></i>
+      ganagalapudi.bhasker@gmail.com
+    </a>
+    <a href="https://wa.me/918555079452" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:4px;font-size:11px;color:#16a34a;text-decoration:none;">
+      <i class="fa-brands fa-whatsapp" style="font-size:12px;"></i>
+      +91 85550 79452 <span style="font-size:10px;color:#a1a1aa;margin-left:1px;">(WhatsApp only)</span>
+    </a>
+  </div>
+</footer>
 
 <!-- Upload Modal -->
 <div id="upload-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
