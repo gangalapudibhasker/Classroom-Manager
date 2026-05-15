@@ -94,7 +94,7 @@
         <i class="fa-solid fa-lock text-indigo-600 text-2xl"></i>
       </div>
       <h3 class="text-xl font-semibold">Admin Access</h3>
-      <p class="text-sm text-zinc-500 mt-1">Enter password to unlock upload</p>
+      <p id="login-subtitle" class="text-sm text-zinc-500 mt-1">Enter password to unlock upload</p>
     </div>
     <input id="admin-password" type="password" placeholder="Enter password"
       class="w-full border border-zinc-300 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-3">
@@ -314,9 +314,9 @@
             <button data-action="open" data-filename="${file.name}" class="flex-1 bg-indigo-600 text-white text-sm py-2 rounded-2xl hover:bg-indigo-700 transition-colors">
               <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Open
             </button>
-            <button data-action="delete" data-filename="${file.name}" class="px-4 py-2 border text-zinc-500 text-sm rounded-2xl hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors">
+            ${isAdmin ? `<button data-action="delete" data-filename="${file.name}" class="px-4 py-2 border text-zinc-400 text-sm rounded-2xl hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors">
               <i class="fa-solid fa-trash"></i>
-            </button>
+            </button>` : ''}
           </div>
         `;
         container.appendChild(div);
@@ -378,7 +378,21 @@
     }
   }
 
+  let pendingDeleteFile = null;
+  let pendingDeleteBtn = null;
+
   async function deleteFile(filename, btn) {
+    if (!isAdmin) {
+      // Store what we want to delete, then ask for password
+      pendingDeleteFile = filename;
+      pendingDeleteBtn = btn;
+      showLoginModal('delete');
+      return;
+    }
+    executeDelete(filename, btn);
+  }
+
+  async function executeDelete(filename, btn) {
     if (!confirm(`Delete "${filename.replace(/^\d+-/, '')}"?`)) return;
     btn.disabled = true;
     const { error } = await sb.storage.from(BUCKET).remove([`${currentGrade}/${filename}`]);
@@ -417,18 +431,29 @@
 
   // ── Password Auth ──────────────────────────────
   // Change this to your own password
-  const ADMIN_PASSWORD = 'Gsreddy8*';
+  const ADMIN_PASSWORD = 'MathHub@2025';
   let isAdmin = false;
 
   function updateAuthUI() {
     document.getElementById('btn-open-modal').classList.toggle('hidden', !isAdmin);
     document.getElementById('btn-logout').classList.toggle('hidden', !isAdmin);
     document.getElementById('btn-login').classList.toggle('hidden', isAdmin);
+    loadFiles(); // re-render cards to show/hide delete button
   }
 
-  function showLoginModal() {
+  let loginContext = 'upload';
+
+  function showLoginModal(context = 'upload') {
+    loginContext = context;
     document.getElementById('admin-password').value = '';
     document.getElementById('password-error').classList.add('hidden');
+    // Update subtitle based on context
+    const subtitle = document.getElementById('login-subtitle');
+    if (context === 'delete') {
+      subtitle.textContent = 'Enter password to authorise this deletion';
+    } else {
+      subtitle.textContent = 'Enter password to unlock upload';
+    }
     document.getElementById('login-modal').classList.remove('hidden');
     setTimeout(() => document.getElementById('admin-password').focus(), 100);
   }
@@ -440,9 +465,20 @@
   function checkPassword() {
     const val = document.getElementById('admin-password').value;
     if (val === ADMIN_PASSWORD) {
-      isAdmin = true;
       hideLoginModal();
-      updateAuthUI();
+      if (loginContext === 'delete' && pendingDeleteFile) {
+        // Don't set isAdmin persistently — just carry out the delete
+        const f = pendingDeleteFile;
+        const b = pendingDeleteBtn;
+        pendingDeleteFile = null;
+        pendingDeleteBtn = null;
+        // Temporarily elevate to execute delete
+        isAdmin = true;
+        executeDelete(f, b).then(() => { isAdmin = false; updateAuthUI(); });
+      } else {
+        isAdmin = true;
+        updateAuthUI();
+      }
     } else {
       document.getElementById('password-error').classList.remove('hidden');
       document.getElementById('admin-password').value = '';
