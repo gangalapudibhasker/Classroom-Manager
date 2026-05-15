@@ -296,12 +296,36 @@
   }
 
   // ── Open / Delete — called via event delegation on #resources-container ──
-  function openFile(filename) {
-    const { data } = sb.storage.from(BUCKET).getPublicUrl(`${currentGrade}/${filename}`);
-    if (data?.publicUrl) {
-      window.open(data.publicUrl, '_blank');
+  async function openFile(filename) {
+    const ext = filename.split('.').pop().toLowerCase();
+
+    if (ext === 'html' || ext === 'htm') {
+      // Download the raw HTML and open it rendered via a blob URL
+      const { data, error } = await sb.storage
+        .from(BUCKET)
+        .download(`${currentGrade}/${filename}`);
+
+      if (error) {
+        alert('Could not open file: ' + error.message);
+        return;
+      }
+
+      const text = await data.text();
+      const blob = new Blob([text], { type: 'text/html' });
+      const blobUrl = URL.createObjectURL(blob);
+      const win = window.open(blobUrl, '_blank');
+
+      // Free memory after the tab loads
+      if (win) win.addEventListener('load', () => URL.revokeObjectURL(blobUrl));
+
     } else {
-      alert('Could not generate a public URL. Make sure your bucket is set to Public in Supabase.');
+      // PDFs, images, etc. — use public URL directly
+      const { data } = sb.storage.from(BUCKET).getPublicUrl(`${currentGrade}/${filename}`);
+      if (data?.publicUrl) {
+        window.open(data.publicUrl, '_blank');
+      } else {
+        alert('Could not generate a public URL. Make sure your bucket is set to Public in Supabase.');
+      }
     }
   }
 
