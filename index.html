@@ -394,21 +394,15 @@
           ${thumbUrl
             ? `<img src="${thumbUrl}" alt="Thumbnail" class="thumb-img">`
             : `<div class="thumb-placeholder">${icon}</div>`}
-          <div class="p-4 flex flex-col gap-3 flex-1">
-            <div class="flex-1">
-              <p class="font-medium text-sm leading-snug break-words">${displayName}</p>
-              <p class="text-xs text-zinc-400 mt-1">${sizeText ? sizeText + ' · ' : ''}${ext}</p>
-            </div>
-            <div class="flex gap-2">
-              <button data-action="open" data-filename="${file.name}"
-                class="flex-1 bg-indigo-600 text-white text-sm py-2 rounded-xl hover:bg-indigo-700 transition-colors">
-                <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Open
-              </button>
-              ${isAdmin ? `<button data-action="delete" data-filename="${file.name}"
-                class="px-3 py-2 border text-zinc-400 text-sm rounded-xl hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors">
-                <i class="fa-solid fa-trash"></i>
-              </button>` : ''}
-            </div>
+          <div class="p-3 flex gap-2">
+            <button data-action="open" data-filename="${file.name}"
+              class="flex-1 bg-indigo-600 text-white text-sm py-2 rounded-xl hover:bg-indigo-700 transition-colors">
+              <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Open
+            </button>
+            ${isAdmin ? `<button data-action="delete" data-filename="${file.name}"
+              class="px-3 py-2 border text-zinc-400 text-sm rounded-xl hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors">
+              <i class="fa-solid fa-trash"></i>
+            </button>` : ''}
           </div>`;
         container.appendChild(div);
       });
