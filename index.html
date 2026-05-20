@@ -1,15 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="te">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MathHub • Classroom Manager</title>
+  <meta name="geo.region" content="IN-AP">
+  <meta name="geo.placename" content="Tirupati, Andhra Pradesh, India">
+  <meta name="language" content="Telugu, English">
+  <title>MathHub • గణిత వనరులు | Tirupati, Andhra Pradesh</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
-    body { font-family: 'Inter', sans-serif; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&family=Noto+Sans+Telugu:wght@400;500;600&display=swap');
+    body { font-family: 'Inter', 'Noto Sans Telugu', sans-serif; }
     .logo-font { font-family: 'Space Grotesk', sans-serif; }
     .upload-area { border: 2px dashed #c7d2fe; transition: border-color 0.2s, background 0.2s; }
     .upload-area.drag-over { border-color: #4f46e5; background: #eef2ff; }
@@ -18,6 +21,7 @@
     #sidebar-overlay { transition: opacity 0.25s ease; }
     .thumb-img { width: 100%; height: 130px; object-fit: contain; background: #f8f8f9; border-radius: 16px 16px 0 0; }
     .thumb-placeholder { width: 100%; height: 90px; display: flex; align-items: center; justify-content: center; background: #f4f4f5; font-size: 2.2rem; border-radius: 16px 16px 0 0; }
+    @media (min-width: 640px) { .sm-show { display: inline !important; } }
   </style>
 </head>
 <body class="bg-zinc-50 text-zinc-800 flex flex-col h-screen overflow-hidden">
@@ -32,7 +36,7 @@
     <div class="px-6 py-5 border-b flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-xl">📐</div>
-        <span class="logo-font text-2xl font-semibold">MathHub</span>
+        <span class="logo-font text-2xl font-semibold">MathHub <span class="text-sm font-normal text-zinc-400">🇮🇳</span></span>
       </div>
       <button id="btn-close-sidebar" class="lg:hidden text-zinc-400 hover:text-zinc-600 text-xl p-1">
         <i class="fa-solid fa-xmark"></i>
@@ -53,9 +57,9 @@
         <button id="btn-open-sidebar" class="lg:hidden text-zinc-500 hover:text-indigo-600 text-xl flex-shrink-0">
           <i class="fa-solid fa-bars"></i>
         </button>
-        <div id="current-grade" class="text-lg md:text-2xl font-semibold truncate">Grade 8 • Mathematics</div>
+        <div id="current-grade" class="text-lg md:text-2xl font-semibold truncate">Grade 6 • Mathematics</div>
       </div>
-      <div id="auth-controls" class="flex items-center gap-2 flex-shrink-0">
+      <div class="flex items-center gap-2 flex-shrink-0">
         <button id="btn-open-modal" class="hidden bg-indigo-600 text-white px-4 py-2 rounded-3xl flex items-center gap-2 text-sm hover:bg-indigo-700 transition-colors">
           <i class="fa-solid fa-upload"></i>
           <span class="hidden sm:inline">Upload</span>
@@ -64,13 +68,13 @@
           <i class="fa-solid fa-lock-open"></i>
         </button>
         <button id="btn-login" class="border border-indigo-600 text-indigo-600 px-4 py-2 rounded-3xl text-sm hover:bg-indigo-50 transition-colors">
-          <i class="fa-solid fa-lock mr-1"></i>Admin
+          <i class="fa-solid fa-lock mr-1"></i><span class="hidden sm:inline">Admin / </span>అడ్మిన్
         </button>
       </div>
     </header>
 
     <!-- Resources grid -->
-    <div class="flex-1 overflow-auto p-4 md:p-8 flex flex-col">
+    <div class="flex-1 overflow-auto p-4 md:p-8">
       <div id="resources-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
     </div>
 
@@ -83,16 +87,16 @@
     <span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#a1a1aa;">Designed by</span>
     <span style="font-size:12px;font-weight:500;color:#18181b;">Gangalapudi Bhasker Reddy</span>
     <span style="color:#d4d4d8;font-size:11px;">·</span>
-    <span style="font-size:11px;color:#71717a;">Andhra Pradesh Mathematics Forum, State President</span>
+    <span style="font-size:11px;color:#71717a;">Andhra Pradesh Mathematics Forum, State President · Tirupati, Andhra Pradesh, India 🇮🇳</span>
   </div>
   <div style="display:flex;align-items:center;gap:12px;">
     <a href="mailto:ganagalapudi.bhasker@gmail.com" style="display:flex;align-items:center;gap:4px;font-size:11px;color:#4f46e5;text-decoration:none;">
       <i class="fa-solid fa-envelope" style="font-size:12px;"></i>
-      <span style="display:none;" class="sm-show">ganagalapudi.bhasker@gmail.com</span>
+      <span class="sm-show" style="display:none;">ganagalapudi.bhasker@gmail.com</span>
     </a>
     <a href="https://wa.me/918555079452" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:4px;font-size:11px;color:#16a34a;text-decoration:none;">
       <i class="fa-brands fa-whatsapp" style="font-size:12px;"></i>
-      +91 85550 79452 <span style="font-size:10px;color:#a1a1aa;margin-left:2px;">(WhatsApp only)</span>
+      +91 85550 79452 <span style="font-size:10px;color:#a1a1aa;margin-left:2px;">(WhatsApp మాత్రమే)</span>
     </a>
   </div>
 </footer>
@@ -105,14 +109,59 @@
         <i class="fa-solid fa-lock text-indigo-600 text-xl"></i>
       </div>
       <h3 class="text-lg font-semibold">Admin Access</h3>
-      <p id="login-subtitle" class="text-sm text-zinc-500 mt-1">Enter password to unlock upload</p>
+      <p class="text-sm text-zinc-500 mt-1">అడ్మిన్ యాక్సెస్ కోసం పాస్‌వర్డ్ నమోదు చేయండి</p>
     </div>
-    <input id="admin-password" type="password" placeholder="Enter password"
+    <input id="admin-password" type="password" placeholder="పాస్‌వర్డ్ నమోదు చేయండి / Enter password"
       class="w-full border border-zinc-300 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-3">
-    <div id="password-error" class="hidden text-red-500 text-sm mb-3 p-3 bg-red-50 rounded-xl">Incorrect password. Try again.</div>
+    <div id="password-error" class="hidden text-red-500 text-sm mb-3 p-3 bg-red-50 rounded-xl">తప్పు పాస్‌వర్డ్. మళ్ళీ ప్రయత్నించండి. / Incorrect password.</div>
     <div class="flex gap-3">
-      <button id="btn-close-login" class="flex-1 py-3 border rounded-3xl text-sm hover:bg-zinc-50 transition-colors">Cancel</button>
-      <button id="btn-confirm-password" class="flex-1 bg-indigo-600 text-white py-3 rounded-3xl text-sm hover:bg-indigo-700 transition-colors">Unlock</button>
+      <button id="btn-close-login" class="flex-1 py-3 border rounded-3xl text-sm hover:bg-zinc-50 transition-colors">రద్దు / Cancel</button>
+      <button id="btn-confirm-password" class="flex-1 bg-indigo-600 text-white py-3 rounded-3xl text-sm hover:bg-indigo-700 transition-colors">తెరవండి / Unlock</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="edit-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
+  <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl" style="max-height:90vh;overflow-y:auto;">
+    <h3 class="text-lg font-semibold mb-1">Edit Resource</h3>
+    <p id="edit-current-name" class="text-sm text-zinc-400 mb-5 break-words"></p>
+
+    <p class="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-2">Replace File <span class="text-zinc-300">(optional)</span></p>
+    <div id="edit-drop-zone" class="upload-area rounded-2xl p-5 text-center mb-5 cursor-pointer">
+      <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-400 mb-2"></i>
+      <p class="font-medium text-zinc-700 text-sm">Drag & drop or tap to choose</p>
+      <p id="edit-file-label" class="text-sm text-zinc-400 mt-1">No file selected</p>
+    </div>
+    <input type="file" id="editFileInput" class="hidden">
+
+    <p class="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-2">Replace Thumbnail <span class="text-zinc-300">(optional)</span></p>
+    <div id="edit-thumb-zone" class="upload-area rounded-2xl p-4 text-center mb-5 cursor-pointer">
+      <div id="edit-thumb-preview-wrap" class="hidden mb-2">
+        <img id="edit-thumb-preview" src="" alt="Preview" class="w-full h-28 object-contain rounded-xl bg-zinc-50">
+      </div>
+      <div id="edit-thumb-placeholder">
+        <i class="fa-solid fa-image text-2xl text-zinc-300 mb-1"></i>
+        <p class="text-sm text-zinc-400">Tap to replace thumbnail</p>
+      </div>
+    </div>
+    <input type="file" id="editThumbInput" class="hidden" accept="image/*">
+
+    <div id="edit-progress-wrap" class="hidden mb-4">
+      <div class="flex justify-between text-xs text-zinc-500 mb-1">
+        <span id="edit-progress-label">Saving…</span>
+        <span id="edit-progress-pct">0%</span>
+      </div>
+      <div class="w-full bg-zinc-100 rounded-full h-2">
+        <div id="edit-progress-bar" class="progress-bar-inner bg-indigo-600 h-2 rounded-full" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div id="edit-error" class="hidden text-red-500 text-sm mb-3 p-3 bg-red-50 rounded-xl"></div>
+
+    <div class="flex gap-3">
+      <button id="btn-edit-cancel" class="flex-1 py-3 border rounded-3xl text-sm hover:bg-zinc-50 transition-colors">రద్దు / Cancel</button>
+      <button id="btn-edit-save" class="flex-1 bg-indigo-600 text-white py-3 rounded-3xl text-sm hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">సేవ్ / Save</button>
     </div>
   </div>
 </div>
@@ -121,9 +170,8 @@
 <div id="upload-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
   <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl" style="max-height:90vh;overflow-y:auto;">
     <h3 class="text-lg font-semibold mb-1">Upload Math Resource</h3>
-    <p class="text-sm text-zinc-500 mb-5">Supports PDF, DOCX, images, HTML and more.</p>
+    <p class="text-sm text-zinc-500 mb-5">PDF, DOCX, చిత్రాలు, HTML మరియు మరిన్నీ అప్‌లోడ్ చేయవచ్చు.</p>
 
-    <!-- Resource file -->
     <p class="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-2">Resource File <span class="text-red-400">*</span></p>
     <div id="drop-zone" class="upload-area rounded-2xl p-5 text-center mb-5 cursor-pointer">
       <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-400 mb-2"></i>
@@ -132,11 +180,10 @@
     </div>
     <input type="file" id="fileInput" class="hidden">
 
-    <!-- Thumbnail -->
     <p class="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-2">Thumbnail <span class="text-zinc-300">(optional)</span></p>
     <div id="thumb-drop-zone" class="upload-area rounded-2xl p-4 text-center mb-5 cursor-pointer">
       <div id="thumb-preview-wrap" class="hidden mb-2">
-        <img id="thumb-preview" src="" alt="Thumbnail preview" class="w-full h-28 object-cover rounded-xl">
+        <img id="thumb-preview" src="" alt="Thumbnail preview" class="w-full h-28 object-contain rounded-xl bg-zinc-50">
       </div>
       <div id="thumb-placeholder-content">
         <i class="fa-solid fa-image text-2xl text-zinc-300 mb-1"></i>
@@ -146,7 +193,6 @@
     </div>
     <input type="file" id="thumbInput" class="hidden" accept="image/*">
 
-    <!-- Progress -->
     <div id="progress-wrap" class="hidden mb-4">
       <div class="flex justify-between text-xs text-zinc-500 mb-1">
         <span id="progress-label">Uploading…</span>
@@ -160,261 +206,31 @@
     <div id="upload-error" class="hidden text-red-500 text-sm mb-3 p-3 bg-red-50 rounded-xl"></div>
 
     <div class="flex gap-3">
-      <button id="btn-cancel" class="flex-1 py-3 border rounded-3xl text-sm hover:bg-zinc-50 transition-colors">Cancel</button>
-      <button id="upload-btn" class="flex-1 bg-indigo-600 text-white py-3 rounded-3xl text-sm hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Upload</button>
+      <button id="btn-cancel" class="flex-1 py-3 border rounded-3xl text-sm hover:bg-zinc-50 transition-colors">రద్దు / Cancel</button>
+      <button id="upload-btn" class="flex-1 bg-indigo-600 text-white py-3 rounded-3xl text-sm hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">అప్‌లోడ్ / Upload</button>
     </div>
   </div>
 </div>
 
 <script>
-  const SUPABASE_URL = 'https://uelnmcbwicwheancmgcu.supabase.co';
+  const SUPABASE_URL  = 'https://uelnmcbwicwheancmgcu.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlbG5tY2J3aWN3aGVhbmNtZ2N1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MDA4ODgsImV4cCI6MjA5NDM3Njg4OH0.IQ8YFiofOeW0Vs_FI_w01pKf56YNe8qorJXa__7RR4I';
   const { createClient } = supabase;
   const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const BUCKET = 'math-resources';
+  const BUCKET         = 'math-resources';
   const ADMIN_PASSWORD = 'Gsreddy8*';
 
-  let currentGrade = 8;
-  let selectedFile = null;
-  let selectedThumb = null;
-  let isAdmin = false;
+  let currentGrade     = 6;
+  let isAdmin          = false;
+  let selectedFile     = null;
+  let selectedThumb    = null;
+  let editingFilename  = null;
+  let editSelectedFile = null;
+  let editSelectedThumb = null;
 
-  // ── Sidebar (mobile) ──────────────────────────
-  function openSidebar() {
-    const s = document.getElementById('sidebar');
-    const o = document.getElementById('sidebar-overlay');
-    s.classList.remove('-translate-x-full');
-    o.classList.remove('hidden');
-    setTimeout(() => o.classList.remove('opacity-0'), 10);
-  }
-  function closeSidebar() {
-    const s = document.getElementById('sidebar');
-    const o = document.getElementById('sidebar-overlay');
-    s.classList.add('-translate-x-full');
-    o.classList.add('opacity-0');
-    setTimeout(() => o.classList.add('hidden'), 250);
-  }
-
-  // ── Grade list ────────────────────────────────
-  function renderGradeList() {
-    const container = document.getElementById('grade-list');
-    container.innerHTML = '';
-    for (let g = 6; g <= 10; g++) {
-      const active = g === currentGrade ? 'bg-indigo-50 text-indigo-700 font-medium' : 'hover:bg-zinc-100 text-zinc-700';
-      const div = document.createElement('div');
-      div.className = `px-4 py-3 rounded-2xl cursor-pointer flex items-center transition-colors ${active}`;
-      div.innerHTML = `<span>Grade ${g} Mathematics</span>`;
-      div.onclick = () => {
-        currentGrade = g;
-        renderGradeList();
-        loadFiles();
-        document.getElementById('current-grade').textContent = `Grade ${g} • Mathematics`;
-        closeSidebar();
-      };
-      container.appendChild(div);
-    }
-  }
-
-  // ── Auth ──────────────────────────────────────
-  function updateAuthUI() {
-    document.getElementById('btn-open-modal').classList.toggle('hidden', !isAdmin);
-    document.getElementById('btn-logout').classList.toggle('hidden', !isAdmin);
-    document.getElementById('btn-login').classList.toggle('hidden', isAdmin);
-    loadFiles();
-  }
-
-  function showLoginModal() {
-    document.getElementById('admin-password').value = '';
-    document.getElementById('password-error').classList.add('hidden');
-    document.getElementById('login-modal').classList.remove('hidden');
-    setTimeout(() => document.getElementById('admin-password').focus(), 100);
-  }
-  function hideLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
-
-  function checkPassword() {
-    const val = document.getElementById('admin-password').value;
-    if (val === ADMIN_PASSWORD) {
-      isAdmin = true;
-      hideLoginModal();
-      updateAuthUI();
-    } else {
-      document.getElementById('password-error').classList.remove('hidden');
-      document.getElementById('admin-password').value = '';
-      document.getElementById('admin-password').focus();
-    }
-  }
-  function logout() { isAdmin = false; updateAuthUI(); }
-
-  // ── Upload modal ──────────────────────────────
-  function showUploadModal() {
-    selectedFile = null;
-    selectedThumb = null;
-    document.getElementById('fileInput').value = '';
-    document.getElementById('thumbInput').value = '';
-    document.getElementById('file-label').textContent = 'No file selected';
-    document.getElementById('thumb-preview-wrap').classList.add('hidden');
-    document.getElementById('thumb-placeholder-content').classList.remove('hidden');
-    document.getElementById('progress-wrap').classList.add('hidden');
-    document.getElementById('progress-bar').style.width = '0%';
-    hideError();
-    document.getElementById('upload-modal').classList.remove('hidden');
-  }
-  function hideUploadModal() { document.getElementById('upload-modal').classList.add('hidden'); }
-  function showError(msg) {
-    const el = document.getElementById('upload-error');
-    el.textContent = msg;
-    el.classList.remove('hidden');
-  }
-  function hideError() { document.getElementById('upload-error').classList.add('hidden'); }
-  function setProgress(pct, label) {
-    document.getElementById('progress-bar').style.width = pct + '%';
-    document.getElementById('progress-pct').textContent = pct + '%';
-    if (label) document.getElementById('progress-label').textContent = label;
-  }
-
-  // ── File pickers ──────────────────────────────
-  function onFileChosen(e) {
-    selectedFile = e.target.files[0];
-    document.getElementById('file-label').textContent = selectedFile ? selectedFile.name : 'No file selected';
-  }
-  function onThumbChosen(e) {
-    selectedThumb = e.target.files[0];
-    if (selectedThumb) {
-      document.getElementById('thumb-placeholder-content').classList.add('hidden');
-      const reader = new FileReader();
-      reader.onload = ev => {
-        document.getElementById('thumb-preview').src = ev.target.result;
-        document.getElementById('thumb-preview-wrap').classList.remove('hidden');
-      };
-      reader.readAsDataURL(selectedThumb);
-    }
-  }
-  function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
-  function handleDragLeave() { document.getElementById('drop-zone').classList.remove('drag-over'); }
-  function handleDrop(e) {
-    e.preventDefault();
-    document.getElementById('drop-zone').classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (file) { selectedFile = file; document.getElementById('file-label').textContent = file.name; }
-  }
-
-  // ── Upload ────────────────────────────────────
-  async function uploadFile() {
-    if (!selectedFile) return showError('Please select a file first.');
-    const btn = document.getElementById('upload-btn');
-    btn.disabled = true;
-    hideError();
-    document.getElementById('progress-wrap').classList.remove('hidden');
-
-    const ts = Date.now();
-    const safeName = selectedFile.name.replace(/[^a-zA-Z0-9._\-]/g, '_');
-    const filePath = `${currentGrade}/${ts}-${safeName}`;
-
-    try {
-      setProgress(20, 'Uploading file…');
-      const { error: fileErr } = await sb.storage.from(BUCKET).upload(filePath, selectedFile, { upsert: true });
-      if (fileErr) throw fileErr;
-
-      if (selectedThumb) {
-        setProgress(65, 'Uploading thumbnail…');
-        const thumbExt = selectedThumb.name.split('.').pop();
-        const thumbPath = `${currentGrade}/thumbs/${ts}-${safeName}.${thumbExt}`;
-        const { error: thumbErr } = await sb.storage.from(BUCKET).upload(thumbPath, selectedThumb, { upsert: true });
-        if (thumbErr) console.warn('Thumbnail upload failed:', thumbErr.message);
-      }
-
-      setProgress(100, 'Done!');
-      setTimeout(() => { hideUploadModal(); loadFiles(); }, 600);
-    } catch (err) {
-      console.error('Upload error:', err);
-      showError('Upload failed: ' + (err.message || JSON.stringify(err)));
-      document.getElementById('progress-wrap').classList.add('hidden');
-    } finally {
-      btn.disabled = false;
-    }
-  }
-
-  // ── Load files ────────────────────────────────
-  async function loadFiles() {
-    const container = document.getElementById('resources-container');
-    container.innerHTML = `
-      <div class="col-span-full flex items-center mb-2">
-        <h2 class="text-xl md:text-2xl font-semibold">Grade ${currentGrade} Resources</h2>
-      </div>
-      <div class="col-span-full flex justify-center py-16">
-        <i class="fa-solid fa-spinner fa-spin text-3xl text-indigo-400"></i>
-      </div>`;
-
-    try {
-      const [filesRes, thumbsRes] = await Promise.all([
-        sb.storage.from(BUCKET).list(`${currentGrade}/`, { limit: 100, sortBy: { column: 'created_at', order: 'desc' } }),
-        sb.storage.from(BUCKET).list(`${currentGrade}/thumbs/`, { limit: 100 })
-      ]);
-
-      if (filesRes.error) throw filesRes.error;
-
-      const files = (filesRes.data || []).filter(f => f.name !== '.emptyFolderPlaceholder' && f.name !== 'thumbs');
-      const thumbs = (thumbsRes.data || []).filter(f => f.name !== '.emptyFolderPlaceholder');
-
-      // Map timestamp prefix → public thumbnail URL
-      const thumbMap = {};
-      thumbs.forEach(t => {
-        const ts = t.name.split('-')[0];
-        const { data } = sb.storage.from(BUCKET).getPublicUrl(`${currentGrade}/thumbs/${t.name}`);
-        thumbMap[ts] = data.publicUrl;
-      });
-
-      container.innerHTML = `
-        <div class="col-span-full flex items-center mb-2">
-          <h2 class="text-xl md:text-2xl font-semibold">Grade ${currentGrade} Resources</h2>
-        </div>`;
-
-      if (files.length === 0) {
-        container.innerHTML += `
-          <div class="col-span-full flex flex-col items-center justify-center py-24 text-zinc-400 gap-3">
-            <i class="fa-solid fa-folder-open text-5xl"></i>
-            <p class="text-lg font-medium">No resources yet</p>
-            <p class="text-sm">Upload your first resource using the button above</p>
-          </div>`;
-        return;
-      }
-
-      files.forEach(file => {
-        const sizeText = file.metadata?.size ? (file.metadata.size / 1024 / 1024).toFixed(2) + ' MB' : '';
-        const ext = file.name.split('.').pop().toUpperCase();
-        const icon = getIcon(ext);
-        const displayName = file.name.replace(/^\d+-/, '');
-        const ts = file.name.split('-')[0];
-        const thumbUrl = thumbMap[ts] || null;
-
-        const div = document.createElement('div');
-        div.className = 'bg-white border rounded-2xl overflow-hidden flex flex-col hover:shadow-md transition-shadow';
-        div.innerHTML = `
-          ${thumbUrl
-            ? `<img src="${thumbUrl}" alt="Thumbnail" class="thumb-img">`
-            : `<div class="thumb-placeholder">${icon}</div>`}
-          <div class="p-3 flex gap-2">
-            <button data-action="open" data-filename="${file.name}"
-              class="flex-1 bg-indigo-600 text-white text-sm py-2 rounded-xl hover:bg-indigo-700 transition-colors">
-              <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Open
-            </button>
-            ${isAdmin ? `<button data-action="delete" data-filename="${file.name}"
-              class="px-3 py-2 border text-zinc-400 text-sm rounded-xl hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors">
-              <i class="fa-solid fa-trash"></i>
-            </button>` : ''}
-          </div>`;
-        container.appendChild(div);
-      });
-
-    } catch (err) {
-      console.error('Load error:', err);
-      container.innerHTML = `
-        <div class="col-span-full p-6 bg-red-50 rounded-2xl text-red-600">
-          <strong>Error loading files:</strong> ${err.message}
-        </div>`;
-    }
-  }
+  // ── Helpers ───────────────────────────────────
+  function eid(id) { return document.getElementById(id); }
 
   function getIcon(ext) {
     const map = {
@@ -425,21 +241,351 @@
     return map[ext] || '📁';
   }
 
+  // ── Sidebar ───────────────────────────────────
+  function openSidebar() {
+    eid('sidebar').classList.remove('-translate-x-full');
+    eid('sidebar-overlay').classList.remove('hidden');
+    setTimeout(() => eid('sidebar-overlay').classList.remove('opacity-0'), 10);
+  }
+  function closeSidebar() {
+    eid('sidebar').classList.add('-translate-x-full');
+    eid('sidebar-overlay').classList.add('opacity-0');
+    setTimeout(() => eid('sidebar-overlay').classList.add('hidden'), 250);
+  }
+
+  // ── Grade list ────────────────────────────────
+  const teluguGrades = {
+    6: '6వ తరగతి గణితం',
+    7: '7వ తరగతి గణితం',
+    8: '8వ తరగతి గణితం',
+    9: '9వ తరగతి గణితం',
+    10: '10వ తరగతి గణితం',
+  };
+
+  function renderGradeList() {
+    const container = eid('grade-list');
+    container.innerHTML = '';
+    for (let g = 6; g <= 10; g++) {
+      const active = g === currentGrade
+        ? 'bg-indigo-50 text-indigo-700 font-medium'
+        : 'hover:bg-zinc-100 text-zinc-700';
+      const div = document.createElement('div');
+      div.className = `px-4 py-3 rounded-2xl cursor-pointer flex items-center transition-colors ${active}`;
+      div.textContent = `Grade ${g} Mathematics`;
+      div.addEventListener('click', () => {
+        currentGrade = g;
+        renderGradeList();
+        eid('current-grade').textContent = `Grade ${g} • Mathematics`;
+        loadFiles();
+        // Only close sidebar if it's actually open (mobile)
+        if (!eid('sidebar-overlay').classList.contains('hidden')) closeSidebar();
+      });
+      container.appendChild(div);
+    }
+  }
+
+  // ── Auth ──────────────────────────────────────
+  function updateAuthUI() {
+    eid('btn-open-modal').classList.toggle('hidden', !isAdmin);
+    eid('btn-logout').classList.toggle('hidden', !isAdmin);
+    eid('btn-login').classList.toggle('hidden', isAdmin);
+    // Re-render cards so edit/delete buttons appear or disappear
+    loadFiles();
+  }
+
+  function showLoginModal() {
+    eid('admin-password').value = '';
+    eid('password-error').classList.add('hidden');
+    eid('login-modal').classList.remove('hidden');
+    setTimeout(() => eid('admin-password').focus(), 100);
+  }
+  function hideLoginModal() { eid('login-modal').classList.add('hidden'); }
+
+  function checkPassword() {
+    if (eid('admin-password').value === ADMIN_PASSWORD) {
+      isAdmin = true;
+      hideLoginModal();
+      updateAuthUI();
+    } else {
+      eid('password-error').classList.remove('hidden');
+      eid('admin-password').value = '';
+      eid('admin-password').focus();
+    }
+  }
+
+  function logout() { isAdmin = false; updateAuthUI(); }
+
+  // ── Upload modal ──────────────────────────────
+  function showUploadModal() {
+    selectedFile  = null;
+    selectedThumb = null;
+    eid('fileInput').value  = '';
+    eid('thumbInput').value = '';
+    eid('file-label').textContent = 'No file selected';
+    eid('thumb-preview-wrap').classList.add('hidden');
+    eid('thumb-placeholder-content').classList.remove('hidden');
+    eid('progress-wrap').classList.add('hidden');
+    eid('progress-bar').style.width = '0%';
+    eid('upload-error').classList.add('hidden');
+    eid('upload-modal').classList.remove('hidden');
+  }
+  function hideUploadModal() { eid('upload-modal').classList.add('hidden'); }
+
+  function setProgress(pct, label) {
+    eid('progress-bar').style.width = pct + '%';
+    eid('progress-pct').textContent  = pct + '%';
+    if (label) eid('progress-label').textContent = label;
+  }
+
+  // ── Edit modal ────────────────────────────────
+  function showEditModal(filename) {
+    editingFilename   = filename;
+    editSelectedFile  = null;
+    editSelectedThumb = null;
+    eid('editFileInput').value  = '';
+    eid('editThumbInput').value = '';
+    eid('edit-file-label').textContent = 'No file selected';
+    eid('edit-thumb-preview-wrap').classList.add('hidden');
+    eid('edit-thumb-placeholder').classList.remove('hidden');
+    eid('edit-progress-wrap').classList.add('hidden');
+    eid('edit-progress-bar').style.width = '0%';
+    eid('edit-error').classList.add('hidden');
+    eid('edit-current-name').textContent = filename.replace(/^\d+-/, '');
+    eid('edit-modal').classList.remove('hidden');
+  }
+  function hideEditModal() { eid('edit-modal').classList.add('hidden'); }
+
+  function setEditProgress(pct, label) {
+    eid('edit-progress-bar').style.width = pct + '%';
+    eid('edit-progress-pct').textContent  = pct + '%';
+    if (label) eid('edit-progress-label').textContent = label;
+  }
+
+  // ── File pickers ──────────────────────────────
+  function previewImage(file, imgEl, wrapEl, placeholderEl) {
+    placeholderEl.classList.add('hidden');
+    const reader = new FileReader();
+    reader.onload = ev => { imgEl.src = ev.target.result; wrapEl.classList.remove('hidden'); };
+    reader.readAsDataURL(file);
+  }
+
+  // ── Upload ────────────────────────────────────
+  async function uploadFile() {
+    if (!selectedFile) {
+      eid('upload-error').textContent = 'Please select a file first.';
+      eid('upload-error').classList.remove('hidden');
+      return;
+    }
+    const btn = eid('upload-btn');
+    btn.disabled = true;
+    eid('upload-error').classList.add('hidden');
+    eid('progress-wrap').classList.remove('hidden');
+
+    const ts       = Date.now();
+    const safeName = selectedFile.name.replace(/[^a-zA-Z0-9._\-]/g, '_');
+    const filePath = `${currentGrade}/${ts}-${safeName}`;
+
+    try {
+      setProgress(20, 'Uploading file…');
+      const { error: fileErr } = await sb.storage.from(BUCKET).upload(filePath, selectedFile, { upsert: true });
+      if (fileErr) throw fileErr;
+
+      if (selectedThumb) {
+        setProgress(65, 'Uploading thumbnail…');
+        const thumbExt  = selectedThumb.name.split('.').pop();
+        const thumbPath = `${currentGrade}/thumbs/${ts}-${safeName}.${thumbExt}`;
+        const { error: thumbErr } = await sb.storage.from(BUCKET).upload(thumbPath, selectedThumb, { upsert: true });
+        if (thumbErr) console.warn('Thumbnail upload failed:', thumbErr.message);
+      }
+
+      setProgress(100, 'Done!');
+      setTimeout(() => { hideUploadModal(); loadFiles(); }, 600);
+    } catch (err) {
+      console.error('Upload error:', err);
+      eid('upload-error').textContent = 'Upload failed: ' + err.message;
+      eid('upload-error').classList.remove('hidden');
+      eid('progress-wrap').classList.add('hidden');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ── Save edit ─────────────────────────────────
+  async function saveEdit() {
+    if (!editSelectedFile && !editSelectedThumb) {
+      eid('edit-error').textContent = 'Select a new file and/or thumbnail to replace.';
+      eid('edit-error').classList.remove('hidden');
+      return;
+    }
+    const btn = eid('btn-edit-save');
+    btn.disabled = true;
+    eid('edit-error').classList.add('hidden');
+    eid('edit-progress-wrap').classList.remove('hidden');
+
+    const ts = editingFilename.split('-')[0];
+
+    try {
+      if (editSelectedFile) {
+        setEditProgress(20, 'Replacing file…');
+        await sb.storage.from(BUCKET).remove([`${currentGrade}/${editingFilename}`]);
+        const safeName = editSelectedFile.name.replace(/[^a-zA-Z0-9._\-]/g, '_');
+        const { error } = await sb.storage.from(BUCKET).upload(`${currentGrade}/${ts}-${safeName}`, editSelectedFile, { upsert: true });
+        if (error) throw error;
+      }
+
+      if (editSelectedThumb) {
+        setEditProgress(65, 'Replacing thumbnail…');
+        const { data: thumbList } = await sb.storage.from(BUCKET).list(`${currentGrade}/thumbs/`);
+        const oldThumb = (thumbList || []).find(t => t.name.startsWith(ts + '-'));
+        if (oldThumb) await sb.storage.from(BUCKET).remove([`${currentGrade}/thumbs/${oldThumb.name}`]);
+
+        const thumbExt  = editSelectedThumb.name.split('.').pop();
+        const baseName  = editSelectedFile
+          ? editSelectedFile.name.replace(/[^a-zA-Z0-9._\-]/g, '_')
+          : editingFilename.replace(/^\d+-/, '');
+        await sb.storage.from(BUCKET).upload(`${currentGrade}/thumbs/${ts}-${baseName}.${thumbExt}`, editSelectedThumb, { upsert: true });
+      }
+
+      setEditProgress(100, 'Done!');
+      setTimeout(() => { hideEditModal(); loadFiles(); }, 600);
+    } catch (err) {
+      console.error('Edit error:', err);
+      eid('edit-error').textContent = 'Save failed: ' + err.message;
+      eid('edit-error').classList.remove('hidden');
+      eid('edit-progress-wrap').classList.add('hidden');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ── Load files ────────────────────────────────
+  async function loadFiles() {
+    const container = eid('resources-container');
+
+    // Heading + spinner
+    container.innerHTML = '';
+    const heading = document.createElement('div');
+    heading.className = 'col-span-full flex items-center mb-2';
+    heading.innerHTML = `<h2 class="text-xl md:text-2xl font-semibold">Grade ${currentGrade} Resources</h2>`;
+    container.appendChild(heading);
+
+    const spinner = document.createElement('div');
+    spinner.className = 'col-span-full flex justify-center py-16';
+    spinner.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-3xl text-indigo-400"></i>';
+    container.appendChild(spinner);
+
+    try {
+      const [filesRes, thumbsRes] = await Promise.all([
+        sb.storage.from(BUCKET).list(`${currentGrade}/`, { limit: 100, sortBy: { column: 'created_at', order: 'desc' } }),
+        sb.storage.from(BUCKET).list(`${currentGrade}/thumbs/`, { limit: 100 })
+      ]);
+
+      if (filesRes.error) throw filesRes.error;
+
+      const files  = (filesRes.data  || []).filter(f => f.name !== '.emptyFolderPlaceholder' && f.name !== 'thumbs');
+      const thumbs = (thumbsRes.data || []).filter(f => f.name !== '.emptyFolderPlaceholder');
+
+      // Build timestamp → public URL map for thumbnails
+      const thumbMap = {};
+      thumbs.forEach(t => {
+        const key = t.name.split('-')[0];
+        const { data } = sb.storage.from(BUCKET).getPublicUrl(`${currentGrade}/thumbs/${t.name}`);
+        thumbMap[key] = data.publicUrl;
+      });
+
+      container.removeChild(spinner);
+
+      if (files.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'col-span-full flex flex-col items-center justify-center py-24 text-zinc-400 gap-3';
+        empty.innerHTML = `
+          <i class="fa-solid fa-folder-open text-5xl"></i>
+          <p class="text-lg font-medium">వనరులు లేవు / No resources yet</p>
+          <p class="text-sm">పైన ఉన్న బటన్ ద్వారా మొదటి వనరును అప్‌లోడ్ చేయండి</p>`;
+        container.appendChild(empty);
+        return;
+      }
+
+      // Snapshot isAdmin at render time to avoid stale closure issues
+      const adminNow = isAdmin;
+
+      files.forEach(file => {
+        const ext         = file.name.split('.').pop().toUpperCase();
+        const icon        = getIcon(ext);
+        const ts          = file.name.split('-')[0];
+        const thumbUrl    = thumbMap[ts] || null;
+
+        const card = document.createElement('div');
+        card.className = 'bg-white border rounded-2xl overflow-hidden flex flex-col hover:shadow-md transition-shadow';
+
+        // Thumbnail or placeholder
+        if (thumbUrl) {
+          const img = document.createElement('img');
+          img.src       = thumbUrl;
+          img.alt       = 'Thumbnail';
+          img.className = 'thumb-img';
+          card.appendChild(img);
+        } else {
+          const ph = document.createElement('div');
+          ph.className   = 'thumb-placeholder';
+          ph.textContent = icon;
+          card.appendChild(ph);
+        }
+
+        // Button row
+        const row = document.createElement('div');
+        row.className = 'p-3 flex gap-2';
+
+        const openBtn = document.createElement('button');
+        openBtn.dataset.action   = 'open';
+        openBtn.dataset.filename = file.name;
+        openBtn.className = 'flex-1 bg-indigo-600 text-white text-sm py-2 rounded-xl hover:bg-indigo-700 transition-colors';
+        openBtn.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> తెరవండి';
+        row.appendChild(openBtn);
+
+        if (adminNow) {
+          const editBtn = document.createElement('button');
+          editBtn.dataset.action   = 'edit';
+          editBtn.dataset.filename = file.name;
+          editBtn.className = 'px-3 py-2 border text-zinc-400 text-sm rounded-xl hover:bg-indigo-50 hover:text-indigo-500 hover:border-indigo-200 transition-colors';
+          editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
+          row.appendChild(editBtn);
+
+          const delBtn = document.createElement('button');
+          delBtn.dataset.action   = 'delete';
+          delBtn.dataset.filename = file.name;
+          delBtn.className = 'px-3 py-2 border text-zinc-400 text-sm rounded-xl hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors';
+          delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+          row.appendChild(delBtn);
+        }
+
+        card.appendChild(row);
+        container.appendChild(card);
+      });
+
+    } catch (err) {
+      console.error('Load error:', err);
+      container.removeChild(spinner);
+      const errDiv = document.createElement('div');
+      errDiv.className = 'col-span-full p-6 bg-red-50 rounded-2xl text-red-600';
+      errDiv.textContent = 'Error loading files: ' + err.message;
+      container.appendChild(errDiv);
+    }
+  }
+
   // ── Open file ─────────────────────────────────
   async function openFile(filename) {
     const ext = filename.split('.').pop().toLowerCase();
     if (ext === 'html' || ext === 'htm') {
       const { data, error } = await sb.storage.from(BUCKET).download(`${currentGrade}/${filename}`);
-      if (error) return alert('Could not open file: ' + error.message);
-      const html = await data.text();
-      // Open a blank tab and write the HTML directly into it — renders immediately, no download
+      if (error) { alert('Could not open file: ' + error.message); return; }
       const win = window.open('', '_blank');
       if (win) {
         win.document.open();
-        win.document.write(html);
+        win.document.write(await data.text());
         win.document.close();
       } else {
-        alert('Popup blocked. Please allow popups for this site and try again.');
+        alert('పాప్-అప్ బ్లాక్ అయింది — దయచేసి పాప్-అప్‌లను అనుమతించండి. / Popup blocked — please allow popups for this site.');
       }
     } else {
       const { data } = sb.storage.from(BUCKET).getPublicUrl(`${currentGrade}/${filename}`);
@@ -449,12 +595,12 @@
 
   // ── Delete file ───────────────────────────────
   async function deleteFile(filename, btn) {
-    if (!confirm(`Delete "${filename.replace(/^\d+-/, '')}"?`)) return;
+    if (!confirm('Delete "' + filename.replace(/^\d+-/, '') + '"?')) return;
     btn.disabled = true;
     const ts = filename.split('-')[0];
-    const { data: thumbs } = await sb.storage.from(BUCKET).list(`${currentGrade}/thumbs/`);
-    const matchThumb = (thumbs || []).find(t => t.name.startsWith(ts + '-'));
-    const toRemove = [`${currentGrade}/${filename}`];
+    const { data: thumbList } = await sb.storage.from(BUCKET).list(`${currentGrade}/thumbs/`);
+    const matchThumb = (thumbList || []).find(t => t.name.startsWith(ts + '-'));
+    const toRemove   = [`${currentGrade}/${filename}`];
     if (matchThumb) toRemove.push(`${currentGrade}/thumbs/${matchThumb.name}`);
     const { error } = await sb.storage.from(BUCKET).remove(toRemove);
     if (error) { alert('Delete failed: ' + error.message); btn.disabled = false; }
@@ -463,45 +609,83 @@
 
   // ── Init ──────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
-    updateAuthUI();
 
     // Sidebar
-    document.getElementById('btn-open-sidebar').addEventListener('click', openSidebar);
-    document.getElementById('btn-close-sidebar').addEventListener('click', closeSidebar);
-    document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
+    eid('btn-open-sidebar').addEventListener('click', openSidebar);
+    eid('btn-close-sidebar').addEventListener('click', closeSidebar);
+    eid('sidebar-overlay').addEventListener('click', closeSidebar);
 
     // Auth
-    document.getElementById('btn-login').addEventListener('click', showLoginModal);
-    document.getElementById('btn-logout').addEventListener('click', logout);
-    document.getElementById('btn-close-login').addEventListener('click', hideLoginModal);
-    document.getElementById('btn-confirm-password').addEventListener('click', checkPassword);
-    document.getElementById('admin-password').addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
+    eid('btn-login').addEventListener('click', showLoginModal);
+    eid('btn-logout').addEventListener('click', logout);
+    eid('btn-close-login').addEventListener('click', hideLoginModal);
+    eid('btn-confirm-password').addEventListener('click', checkPassword);
+    eid('admin-password').addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
 
     // Upload modal
-    document.getElementById('btn-open-modal').addEventListener('click', showUploadModal);
-    document.getElementById('btn-cancel').addEventListener('click', hideUploadModal);
-    document.getElementById('upload-btn').addEventListener('click', uploadFile);
+    eid('btn-open-modal').addEventListener('click', showUploadModal);
+    eid('btn-cancel').addEventListener('click', hideUploadModal);
+    eid('upload-btn').addEventListener('click', uploadFile);
 
-    // Main file drop zone
-    const dz = document.getElementById('drop-zone');
-    dz.addEventListener('click', () => document.getElementById('fileInput').click());
-    dz.addEventListener('dragover', handleDragOver);
-    dz.addEventListener('dragleave', handleDragLeave);
-    dz.addEventListener('drop', handleDrop);
-    document.getElementById('fileInput').addEventListener('change', onFileChosen);
+    const dz = eid('drop-zone');
+    dz.addEventListener('click',     () => eid('fileInput').click());
+    dz.addEventListener('dragover',  e  => { e.preventDefault(); dz.classList.add('drag-over'); });
+    dz.addEventListener('dragleave', ()  => dz.classList.remove('drag-over'));
+    dz.addEventListener('drop',      e  => {
+      e.preventDefault(); dz.classList.remove('drag-over');
+      const f = e.dataTransfer.files[0];
+      if (f) { selectedFile = f; eid('file-label').textContent = f.name; }
+    });
+    eid('fileInput').addEventListener('change', e => {
+      selectedFile = e.target.files[0];
+      eid('file-label').textContent = selectedFile ? selectedFile.name : 'No file selected';
+    });
 
-    // Thumbnail picker
-    document.getElementById('thumb-drop-zone').addEventListener('click', () => document.getElementById('thumbInput').click());
-    document.getElementById('thumbInput').addEventListener('change', onThumbChosen);
+    const tdz = eid('thumb-drop-zone');
+    tdz.addEventListener('click', () => eid('thumbInput').click());
+    eid('thumbInput').addEventListener('change', e => {
+      selectedThumb = e.target.files[0];
+      if (selectedThumb) previewImage(selectedThumb, eid('thumb-preview'), eid('thumb-preview-wrap'), eid('thumb-placeholder-content'));
+    });
 
-    // Card buttons via delegation
-    document.getElementById('resources-container').addEventListener('click', e => {
+    // Edit modal
+    eid('btn-edit-cancel').addEventListener('click', hideEditModal);
+    eid('btn-edit-save').addEventListener('click', saveEdit);
+
+    const edz = eid('edit-drop-zone');
+    edz.addEventListener('click',     () => eid('editFileInput').click());
+    edz.addEventListener('dragover',  e  => { e.preventDefault(); edz.classList.add('drag-over'); });
+    edz.addEventListener('dragleave', ()  => edz.classList.remove('drag-over'));
+    edz.addEventListener('drop',      e  => {
+      e.preventDefault(); edz.classList.remove('drag-over');
+      const f = e.dataTransfer.files[0];
+      if (f) { editSelectedFile = f; eid('edit-file-label').textContent = f.name; }
+    });
+    eid('editFileInput').addEventListener('change', e => {
+      editSelectedFile = e.target.files[0];
+      eid('edit-file-label').textContent = editSelectedFile ? editSelectedFile.name : 'No file selected';
+    });
+
+    const etz = eid('edit-thumb-zone');
+    etz.addEventListener('click', () => eid('editThumbInput').click());
+    eid('editThumbInput').addEventListener('change', e => {
+      editSelectedThumb = e.target.files[0];
+      if (editSelectedThumb) previewImage(editSelectedThumb, eid('edit-thumb-preview'), eid('edit-thumb-preview-wrap'), eid('edit-thumb-placeholder'));
+    });
+
+    // Card delegation
+    eid('resources-container').addEventListener('click', e => {
       const openBtn = e.target.closest('[data-action="open"]');
+      const editBtn = e.target.closest('[data-action="edit"]');
       const delBtn  = e.target.closest('[data-action="delete"]');
       if (openBtn) openFile(openBtn.dataset.filename);
+      if (editBtn) showEditModal(editBtn.dataset.filename);
       if (delBtn)  deleteFile(delBtn.dataset.filename, delBtn);
     });
 
+    // Initial render — call directly, not via updateAuthUI to avoid double loadFiles
+    eid('btn-open-modal').classList.add('hidden');
+    eid('btn-logout').classList.add('hidden');
     renderGradeList();
     loadFiles();
   });
