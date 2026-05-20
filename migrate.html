@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MathHub • Grade 9 Migration Tool</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .logo-font { font-family: 'Space Grotesk', sans-serif; }
+    .log-entry { animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  </style>
+</head>
+<body class="bg-zinc-50 min-h-screen flex items-center justify-center p-4">
+
+<div class="w-full max-w-lg">
+
+  <div class="text-center mb-8">
+    <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-3xl mx-auto mb-4">📐</div>
+    <h1 class="logo-font text-2xl font-semibold">MathHub</h1>
+    <p class="text-zinc-500 text-sm mt-1">Grade 9 → 9a Migration Tool</p>
+  </div>
+
+  <div class="bg-white rounded-3xl shadow-sm border p-8">
+
+    <div class="bg-indigo-50 rounded-2xl p-4 mb-6 flex gap-3">
+      <i class="fa-solid fa-circle-info text-indigo-500 mt-0.5 flex-shrink-0"></i>
+      <div class="text-sm text-indigo-700">
+        Moves every file and thumbnail from <code class="bg-indigo-100 px-1 rounded font-mono">9/</code> → <code class="bg-indigo-100 px-1 rounded font-mono">9a/</code> one by one.
+        Run this <strong>once</strong>, then delete this file from GitHub.
+      </div>
+    </div>
+
+    <!-- Auth -->
+    <div id="auth-section">
+      <label class="block text-sm font-medium text-zinc-700 mb-2">Admin Password</label>
+      <input id="password" type="password" placeholder="Enter your admin password"
+        class="w-full border border-zinc-300 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-3">
+      <div id="pw-error" class="hidden text-red-500 text-sm mb-3 p-3 bg-red-50 rounded-xl">Incorrect password.</div>
+      <button id="btn-start" class="w-full bg-indigo-600 text-white py-3 rounded-2xl text-sm font-medium hover:bg-indigo-700 transition-colors">
+        <i class="fa-solid fa-play mr-2"></i>Start Migration
+      </button>
+    </div>
+
+    <!-- Progress -->
+    <div id="progress-section" class="hidden">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm font-medium text-zinc-700">Progress</span>
+        <span id="progress-count" class="text-sm text-zinc-500">0 / 0</span>
+      </div>
+      <div class="w-full bg-zinc-100 rounded-full h-3 mb-5">
+        <div id="progress-bar" class="bg-indigo-600 h-3 rounded-full transition-all duration-300" style="width:0%"></div>
+      </div>
+
+      <div id="log" class="bg-zinc-50 rounded-2xl p-4 h-64 overflow-y-auto text-xs font-mono space-y-1.5 border"></div>
+
+      <div id="done-section" class="hidden mt-6 text-center">
+        <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+          <i class="fa-solid fa-circle-check text-green-500 text-2xl"></i>
+        </div>
+        <p class="font-semibold text-zinc-800">Migration Complete!</p>
+        <p class="text-sm text-zinc-500 mt-1">All files are now in <code class="bg-zinc-100 px-1 rounded">9a/</code>.</p>
+        <p class="text-xs text-red-400 mt-4 bg-red-50 p-3 rounded-xl">⚠️ Delete <strong>migrate.html</strong> from your GitHub repo now — you don't need it anymore.</p>
+      </div>
+
+      <div id="error-section" class="hidden mt-4 p-4 bg-red-50 rounded-2xl text-sm text-red-600">
+        <i class="fa-solid fa-triangle-exclamation mr-2"></i>
+        <span id="error-summary"></span>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="text-center text-xs text-zinc-400 mt-4">MathHub • Tirupati, Andhra Pradesh 🇮🇳</p>
+</div>
+
+<script>
+  const SUPABASE_URL      = 'https://uelnmcbwicwheancmgcu.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlbG5tY2J3aWN3aGVhbmNtZ2N1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MDA4ODgsImV4cCI6MjA5NDM3Njg4OH0.IQ8YFiofOeW0Vs_FI_w01pKf56YNe8qorJXa__7RR4I';
+  const ADMIN_PASSWORD    = 'MathHub@2025';
+  const BUCKET            = 'math-resources';
+
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let total = 0, done = 0, errors = 0;
+
+  function log(msg, type = 'info') {
+    const el    = document.getElementById('log');
+    const entry = document.createElement('div');
+    entry.className = 'log-entry ' + {
+      ok:   'text-green-600',
+      err:  'text-red-500',
+      skip: 'text-zinc-400',
+      info: 'text-zinc-600',
+    }[type];
+    entry.textContent = msg;
+    el.appendChild(entry);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function setProgress(d, t) {
+    document.getElementById('progress-count').textContent = `${d} / ${t}`;
+    document.getElementById('progress-bar').style.width = t > 0 ? (d / t * 100) + '%' : '0%';
+  }
+
+  async function moveFile(src, dest) {
+    // Download from source
+    const { data: blob, error: dlErr } = await sb.storage.from(BUCKET).download(src);
+    if (dlErr) throw new Error('Download failed: ' + dlErr.message);
+
+    // Upload to destination
+    const { error: ulErr } = await sb.storage.from(BUCKET).upload(dest, blob, { upsert: true });
+    if (ulErr) throw new Error('Upload failed: ' + ulErr.message);
+
+    // Delete original
+    const { error: delErr } = await sb.storage.from(BUCKET).remove([src]);
+    if (delErr) throw new Error('Delete failed: ' + delErr.message);
+  }
+
+  async function runMigration() {
+    log('Scanning 9/ folder...');
+
+    const { data: files, error: listErr } = await sb.storage.from(BUCKET).list('9/', { limit: 200 });
+    if (listErr) { log('Cannot list 9/ — ' + listErr.message, 'err'); return; }
+
+    const mainFiles = (files || []).filter(f => f.name !== '.emptyFolderPlaceholder' && f.name !== 'thumbs');
+
+    const { data: thumbData } = await sb.storage.from(BUCKET).list('9/thumbs/', { limit: 200 });
+    const thumbFiles = (thumbData || []).filter(f => f.name !== '.emptyFolderPlaceholder');
+
+    total  = mainFiles.length + thumbFiles.length;
+    done   = 0;
+    errors = 0;
+
+    if (total === 0) {
+      log('No files found in 9/ — nothing to migrate.', 'skip');
+      document.getElementById('done-section').classList.remove('hidden');
+      return;
+    }
+
+    log(`Found ${mainFiles.length} file(s) + ${thumbFiles.length} thumbnail(s). Starting...`);
+    setProgress(0, total);
+
+    // Move main files
+    for (const file of mainFiles) {
+      log(`→ ${file.name}`);
+      try {
+        await moveFile(`9/${file.name}`, `9a/${file.name}`);
+        done++;
+        setProgress(done, total);
+        log(`  ✓ Moved: ${file.name}`, 'ok');
+      } catch (err) {
+        errors++; done++;
+        setProgress(done, total);
+        log(`  ✗ Failed: ${file.name} — ${err.message}`, 'err');
+      }
+    }
+
+    // Move thumbnails
+    if (thumbFiles.length > 0) {
+      log('--- Thumbnails ---');
+      for (const thumb of thumbFiles) {
+        log(`→ thumb: ${thumb.name}`);
+        try {
+          await moveFile(`9/thumbs/${thumb.name}`, `9a/thumbs/${thumb.name}`);
+          done++;
+          setProgress(done, total);
+          log(`  ✓ Moved: ${thumb.name}`, 'ok');
+        } catch (err) {
+          errors++; done++;
+          setProgress(done, total);
+          log(`  ✗ Failed: ${thumb.name} — ${err.message}`, 'err');
+        }
+      }
+    }
+
+    setProgress(total, total);
+    log('');
+    log(`Done. ${total - errors} moved successfully, ${errors} failed.`);
+
+    if (errors === 0) {
+      document.getElementById('done-section').classList.remove('hidden');
+    } else {
+      document.getElementById('error-summary').textContent =
+        `${errors} file(s) failed. Check the log and move them manually in the Supabase dashboard.`;
+      document.getElementById('error-section').classList.remove('hidden');
+    }
+  }
+
+  document.getElementById('btn-start').addEventListener('click', () => {
+    if (document.getElementById('password').value !== ADMIN_PASSWORD) {
+      document.getElementById('pw-error').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('pw-error').classList.add('hidden');
+    document.getElementById('auth-section').classList.add('hidden');
+    document.getElementById('progress-section').classList.remove('hidden');
+    runMigration();
+  });
+
+  document.getElementById('password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btn-start').click();
+  });
+</script>
+</body>
+</html>
