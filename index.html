@@ -57,7 +57,7 @@
         <button id="btn-open-sidebar" class="lg:hidden text-zinc-500 hover:text-indigo-600 text-xl flex-shrink-0">
           <i class="fa-solid fa-bars"></i>
         </button>
-        <div id="current-grade" class="text-lg md:text-2xl font-semibold truncate">Grade 6 • Mathematics</div>
+        <div id="current-grade" class="text-lg md:text-2xl font-semibold truncate">Grade 6 Mathematics</div>
       </div>
       <div class="flex items-center gap-2 flex-shrink-0">
         <button id="btn-open-modal" class="hidden bg-indigo-600 text-white px-4 py-2 rounded-3xl flex items-center gap-2 text-sm hover:bg-indigo-700 transition-colors">
@@ -221,7 +221,7 @@
   const BUCKET         = 'math-resources';
   const ADMIN_PASSWORD = 'Gsreddy8*';
 
-  let currentGrade     = 6;
+  let currentGrade     = 6;  // matches gradeSections[0].id
   let isAdmin          = false;
   let selectedFile     = null;
   let selectedThumb    = null;
@@ -262,26 +262,40 @@
     10: '10వ తరగతి గణితం',
   };
 
+  // Grade sections — grade 9 is split into two
+  const gradeSections = [
+    { id: 6,    label: 'Grade 6 Mathematics',          folder: '6'    },
+    { id: 7,    label: 'Grade 7 Mathematics',          folder: '7'    },
+    { id: 8,    label: 'Grade 8 Mathematics',          folder: '8'    },
+    { id: '9a', label: 'Grade 9 Mathematics (2026-27)', folder: '9a'  },
+    { id: '9b', label: 'Grade 9 Mathematics (up to 2026)', folder: '9b' },
+    { id: 10,   label: 'Grade 10 Mathematics',         folder: '10'   },
+  ];
+
   function renderGradeList() {
     const container = eid('grade-list');
     container.innerHTML = '';
-    for (let g = 6; g <= 10; g++) {
-      const active = g === currentGrade
+    gradeSections.forEach(section => {
+      const active = section.id === currentGrade
         ? 'bg-indigo-50 text-indigo-700 font-medium'
         : 'hover:bg-zinc-100 text-zinc-700';
       const div = document.createElement('div');
       div.className = `px-4 py-3 rounded-2xl cursor-pointer flex items-center transition-colors ${active}`;
-      div.textContent = `Grade ${g} Mathematics`;
+      div.textContent = section.label;
       div.addEventListener('click', () => {
-        currentGrade = g;
+        currentGrade = section.id;
         renderGradeList();
-        eid('current-grade').textContent = `Grade ${g} • Mathematics`;
+        eid('current-grade').textContent = section.label;
         loadFiles();
-        // Only close sidebar if it's actually open (mobile)
         if (!eid('sidebar-overlay').classList.contains('hidden')) closeSidebar();
       });
       container.appendChild(div);
-    }
+    });
+  }
+
+  function getCurrentFolder() {
+    const section = gradeSections.find(s => s.id === currentGrade);
+    return section ? section.folder : String(currentGrade);
   }
 
   // ── Auth ──────────────────────────────────────
@@ -383,7 +397,7 @@
 
     const ts       = Date.now();
     const safeName = selectedFile.name.replace(/[^a-zA-Z0-9._\-]/g, '_');
-    const filePath = `${currentGrade}/${ts}-${safeName}`;
+    const filePath = `${getCurrentFolder()}/${ts}-${safeName}`;
 
     try {
       setProgress(20, 'Uploading file…');
@@ -393,7 +407,7 @@
       if (selectedThumb) {
         setProgress(65, 'Uploading thumbnail…');
         const thumbExt  = selectedThumb.name.split('.').pop();
-        const thumbPath = `${currentGrade}/thumbs/${ts}-${safeName}.${thumbExt}`;
+        const thumbPath = `${getCurrentFolder()}/thumbs/${ts}-${safeName}.${thumbExt}`;
         const { error: thumbErr } = await sb.storage.from(BUCKET).upload(thumbPath, selectedThumb, { upsert: true });
         if (thumbErr) console.warn('Thumbnail upload failed:', thumbErr.message);
       }
@@ -427,23 +441,23 @@
     try {
       if (editSelectedFile) {
         setEditProgress(20, 'Replacing file…');
-        await sb.storage.from(BUCKET).remove([`${currentGrade}/${editingFilename}`]);
+        await sb.storage.from(BUCKET).remove([`${getCurrentFolder()}/${editingFilename}`]);
         const safeName = editSelectedFile.name.replace(/[^a-zA-Z0-9._\-]/g, '_');
-        const { error } = await sb.storage.from(BUCKET).upload(`${currentGrade}/${ts}-${safeName}`, editSelectedFile, { upsert: true });
+        const { error } = await sb.storage.from(BUCKET).upload(`${getCurrentFolder()}/${ts}-${safeName}`, editSelectedFile, { upsert: true });
         if (error) throw error;
       }
 
       if (editSelectedThumb) {
         setEditProgress(65, 'Replacing thumbnail…');
-        const { data: thumbList } = await sb.storage.from(BUCKET).list(`${currentGrade}/thumbs/`);
+        const { data: thumbList } = await sb.storage.from(BUCKET).list(`${getCurrentFolder()}/thumbs/`);
         const oldThumb = (thumbList || []).find(t => t.name.startsWith(ts + '-'));
-        if (oldThumb) await sb.storage.from(BUCKET).remove([`${currentGrade}/thumbs/${oldThumb.name}`]);
+        if (oldThumb) await sb.storage.from(BUCKET).remove([`${getCurrentFolder()}/thumbs/${oldThumb.name}`]);
 
         const thumbExt  = editSelectedThumb.name.split('.').pop();
         const baseName  = editSelectedFile
           ? editSelectedFile.name.replace(/[^a-zA-Z0-9._\-]/g, '_')
           : editingFilename.replace(/^\d+-/, '');
-        await sb.storage.from(BUCKET).upload(`${currentGrade}/thumbs/${ts}-${baseName}.${thumbExt}`, editSelectedThumb, { upsert: true });
+        await sb.storage.from(BUCKET).upload(`${getCurrentFolder()}/thumbs/${ts}-${baseName}.${thumbExt}`, editSelectedThumb, { upsert: true });
       }
 
       setEditProgress(100, 'Done!');
@@ -466,7 +480,7 @@
     container.innerHTML = '';
     const heading = document.createElement('div');
     heading.className = 'col-span-full flex items-center mb-2';
-    heading.innerHTML = `<h2 class="text-xl md:text-2xl font-semibold">Grade ${currentGrade} Resources</h2>`;
+    heading.innerHTML = `<h2 class="text-xl md:text-2xl font-semibold">${gradeSections.find(s=>s.id===currentGrade)?.label || "Grade "+currentGrade} Resources</h2>`;
     container.appendChild(heading);
 
     const spinner = document.createElement('div');
@@ -476,8 +490,8 @@
 
     try {
       const [filesRes, thumbsRes] = await Promise.all([
-        sb.storage.from(BUCKET).list(`${currentGrade}/`, { limit: 100, sortBy: { column: 'created_at', order: 'desc' } }),
-        sb.storage.from(BUCKET).list(`${currentGrade}/thumbs/`, { limit: 100 })
+        sb.storage.from(BUCKET).list(`${getCurrentFolder()}/`, { limit: 100, sortBy: { column: 'created_at', order: 'desc' } }),
+        sb.storage.from(BUCKET).list(`${getCurrentFolder()}/thumbs/`, { limit: 100 })
       ]);
 
       if (filesRes.error) throw filesRes.error;
@@ -489,7 +503,7 @@
       const thumbMap = {};
       thumbs.forEach(t => {
         const key = t.name.split('-')[0];
-        const { data } = sb.storage.from(BUCKET).getPublicUrl(`${currentGrade}/thumbs/${t.name}`);
+        const { data } = sb.storage.from(BUCKET).getPublicUrl(`${getCurrentFolder()}/thumbs/${t.name}`);
         thumbMap[key] = data.publicUrl;
       });
 
@@ -577,7 +591,7 @@
   async function openFile(filename) {
     const ext = filename.split('.').pop().toLowerCase();
     if (ext === 'html' || ext === 'htm') {
-      const { data, error } = await sb.storage.from(BUCKET).download(`${currentGrade}/${filename}`);
+      const { data, error } = await sb.storage.from(BUCKET).download(`${getCurrentFolder()}/${filename}`);
       if (error) { alert('Could not open file: ' + error.message); return; }
       const win = window.open('', '_blank');
       if (win) {
@@ -588,7 +602,7 @@
         alert('Popup blocked — please allow popups for this site and try again.');
       }
     } else {
-      const { data } = sb.storage.from(BUCKET).getPublicUrl(`${currentGrade}/${filename}`);
+      const { data } = sb.storage.from(BUCKET).getPublicUrl(`${getCurrentFolder()}/${filename}`);
       if (data?.publicUrl) window.open(data.publicUrl, '_blank');
     }
   }
@@ -598,10 +612,10 @@
     if (!confirm('Delete "' + filename.replace(/^\d+-/, '') + '"?')) return;
     btn.disabled = true;
     const ts = filename.split('-')[0];
-    const { data: thumbList } = await sb.storage.from(BUCKET).list(`${currentGrade}/thumbs/`);
+    const { data: thumbList } = await sb.storage.from(BUCKET).list(`${getCurrentFolder()}/thumbs/`);
     const matchThumb = (thumbList || []).find(t => t.name.startsWith(ts + '-'));
-    const toRemove   = [`${currentGrade}/${filename}`];
-    if (matchThumb) toRemove.push(`${currentGrade}/thumbs/${matchThumb.name}`);
+    const toRemove   = [`${getCurrentFolder()}/${filename}`];
+    if (matchThumb) toRemove.push(`${getCurrentFolder()}/thumbs/${matchThumb.name}`);
     const { error } = await sb.storage.from(BUCKET).remove(toRemove);
     if (error) { alert('Delete failed: ' + error.message); btn.disabled = false; }
     else loadFiles();
